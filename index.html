@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GSC Intelligence Dashboard — Impacteers</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: #f7f8fc;
+    --surface: #ffffff;
+    --surface-alt: #f0f2f9;
+    --border: #e4e7f0;
+    --text-primary: #1a1d2e;
+    --text-secondary: #6b7280;
+    --text-muted: #9ca3af;
+    --accent: #4f46e5;
+    --accent-light: #eef2ff;
+    --accent-hover: #4338ca;
+    --green: #10b981;
+    --green-light: #ecfdf5;
+    --red: #ef4444;
+    --red-light: #fef2f2;
+    --amber: #f59e0b;
+    --amber-light: #fffbeb;
+    --blue: #3b82f6;
+    --blue-light: #eff6ff;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow: 0 4px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    font-size: 14px;
+  }
+
+  /* ── AUTH SCREEN ── */
+  #auth-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    background: linear-gradient(135deg, #f7f8fc 0%, #eef2ff 100%);
+  }
+  .auth-card {
+    background: var(--surface);
+    border-radius: 20px;
+    padding: 52px 48px;
+    max-width: 440px;
+    width: 100%;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+  }
+  .auth-logo {
+    width: 56px; height: 56px;
+    background: var(--accent);
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .auth-logo svg { width: 28px; height: 28px; fill: white; }
+  .auth-card h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  .auth-card p { color: var(--text-secondary); font-size: 13px; line-height: 1.6; margin-bottom: 32px; }
+  .auth-properties {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    justify-content: center; margin-bottom: 32px;
+  }
+  .auth-prop-tag {
+    background: var(--accent-light); color: var(--accent);
+    font-size: 11px; font-weight: 600;
+    padding: 4px 10px; border-radius: 20px;
+  }
+  .btn-signin {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--accent); color: white;
+    border: none; border-radius: 10px;
+    padding: 14px 28px; font-family: 'Poppins', sans-serif;
+    font-size: 14px; font-weight: 600; cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    width: 100%; justify-content: center;
+  }
+  .btn-signin:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .btn-signin:active { transform: translateY(0); }
+  .btn-signin svg { width: 18px; height: 18px; }
+  .auth-note {
+    margin-top: 20px; font-size: 11px; color: var(--text-muted);
+    line-height: 1.6;
+  }
+  .setup-steps {
+    text-align: left; margin-bottom: 28px;
+    background: var(--surface-alt); border-radius: 10px; padding: 16px;
+  }
+  .setup-steps p { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .setup-steps ol { padding-left: 16px; }
+  .setup-steps li { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; line-height: 1.5; }
+  .setup-steps code { background: var(--border); padding: 1px 5px; border-radius: 4px; font-size: 11px; font-family: monospace; }
+  #client-id-input {
+    width: 100%; padding: 10px 14px; border: 1.5px solid var(--border);
+    border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 12px;
+    margin-bottom: 12px; outline: none; transition: border 0.2s;
+    color: var(--text-primary);
+  }
+  #client-id-input:focus { border-color: var(--accent); }
+  #client-id-input::placeholder { color: var(--text-muted); }
+
+  /* ── MAIN APP ── */
+  #app { display: none; }
+
+  /* Header */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: var(--shadow-sm);
+  }
+  .header-left { display: flex; align-items: center; gap: 12px; }
+  .header-logo {
+    width: 36px; height: 36px; background: var(--accent);
+    border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  }
+  .header-logo svg { width: 18px; height: 18px; fill: white; }
+  .header-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
+  .header-subtitle { font-size: 11px; color: var(--text-muted); font-weight: 400; }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .header-user {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--text-secondary);
+  }
+  .user-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--accent-light); display: flex; align-items: center; justify-content: center;
+    font-size: 12px; font-weight: 700; color: var(--accent);
+    overflow: hidden;
+  }
+  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
+  .btn-signout {
+    background: none; border: 1.5px solid var(--border); border-radius: 8px;
+    padding: 6px 12px; font-family: 'Poppins', sans-serif; font-size: 12px;
+    color: var(--text-secondary); cursor: pointer; transition: all 0.2s;
+  }
+  .btn-signout:hover { border-color: var(--red); color: var(--red); }
+
+  /* Main layout */
+  .main { display: flex; height: calc(100vh - 64px); }
+
+  /* Sidebar */
+  .sidebar {
+    width: 220px; background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 12px;
+    overflow-y: auto; flex-shrink: 0;
+  }
+  .sidebar-label {
+    font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.8px; color: var(--text-muted);
+    padding: 0 8px; margin-bottom: 8px;
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 10px; border-radius: 8px; cursor: pointer;
+    font-size: 13px; font-weight: 500; color: var(--text-secondary);
+    transition: all 0.15s; margin-bottom: 2px;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .nav-item:hover { background: var(--surface-alt); color: var(--text-primary); }
+  .nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
+  .sidebar-divider { height: 1px; background: var(--border); margin: 12px 8px; }
+  .prop-section { margin-top: 4px; }
+  .prop-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: 8px; cursor: pointer;
+    font-size: 12px; color: var(--text-secondary);
+    transition: all 0.15s; margin-bottom: 2px;
+    border: none; background: none; width: 100%; text-align: left;
+  }
+  .prop-item:hover { background: var(--surface-alt); color: var(--text-primary); }
+  .prop-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
+  .prop-dot {
+    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+  }
+  .prop-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  /* Content */
+  .content {
+    flex: 1; overflow-y: auto;
+    padding: 28px 32px;
+    background: var(--bg);
+  }
+
+  /* Controls bar */
+  .controls-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; gap: 16px; flex-wrap: wrap;
+  }
+  .page-title { font-size: 20px; font-weight: 700; }
+  .page-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+  .controls-right { display: flex; align-items: center; gap: 10px; }
+  .date-range-btns { display: flex; gap: 4px; }
+  .range-btn {
+    padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--border);
+    background: var(--surface); font-family: 'Poppins', sans-serif;
+    font-size: 12px; font-weight: 500; color: var(--text-secondary);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .range-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .range-btn.active { border-color: var(--accent); background: var(--accent); color: white; }
+  .btn-fetch {
+    padding: 8px 18px; border-radius: 8px; border: none;
+    background: var(--accent); color: white;
+    font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600;
+    cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .btn-fetch:hover { background: var(--accent-hover); transform: translateY(-1px); }
+  .btn-fetch:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+  .btn-fetch svg { width: 14px; height: 14px; }
+  .spinner {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* KPI Cards */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 16px; margin-bottom: 24px;
+  }
+  .kpi-card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 20px; box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .kpi-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+  .kpi-label {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .kpi-label svg { width: 13px; height: 13px; }
+  .kpi-value {
+    font-size: 26px; font-weight: 700; letter-spacing: -0.5px;
+    margin-bottom: 6px; line-height: 1;
+  }
+  .kpi-change {
+    font-size: 11px; font-weight: 500;
+    display: flex; align-items: center; gap: 4px;
+  }
+  .kpi-change.up { color: var(--green); }
+  .kpi-change.down { color: var(--red); }
+  .kpi-change.neutral { color: var(--text-muted); }
+
+  /* Charts grid */
+  .charts-grid {
+    display: grid; grid-template-columns: 2fr 1fr;
+    gap: 16px; margin-bottom: 24px;
+  }
+  .chart-card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 20px; box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+  .chart-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .chart-title { font-size: 14px; font-weight: 600; }
+  .chart-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .chart-legend { display: flex; gap: 14px; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-secondary); }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
+  .chart-container { position: relative; height: 220px; }
+  .chart-container-sm { position: relative; height: 200px; }
+
+  /* Tables */
+  .tables-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 16px; margin-bottom: 24px;
+  }
+  .table-card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 20px; box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border);
+  }
+  .table-header { margin-bottom: 14px; }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left; font-size: 10px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.5px;
+    color: var(--text-muted); padding: 0 8px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  th:last-child { text-align: right; }
+  td {
+    padding: 9px 8px; font-size: 12px; color: var(--text-secondary);
+    border-bottom: 1px solid var(--surface-alt);
+    vertical-align: middle;
+  }
+  td:last-child { text-align: right; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface-alt); }
+  .td-primary { color: var(--text-primary); font-weight: 500; }
+  .td-url {
+    max-width: 200px; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+  }
+  .position-badge {
+    display: inline-block; padding: 2px 7px; border-radius: 4px;
+    font-size: 11px; font-weight: 600; min-width: 32px; text-align: center;
+  }
+  .pos-good { background: var(--green-light); color: var(--green); }
+  .pos-mid { background: var(--amber-light); color: var(--amber); }
+  .pos-low { background: var(--red-light); color: var(--red); }
+
+  /* Property overview cards */
+  .prop-overview {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 12px; margin-bottom: 24px;
+  }
+  .prop-card {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 16px; box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .prop-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
+  .prop-card.active-prop { border-color: var(--accent); background: var(--accent-light); }
+  .prop-card-dot { width: 10px; height: 10px; border-radius: 50%; margin-bottom: 10px; }
+  .prop-card-name { font-size: 11px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary); line-height: 1.3; }
+  .prop-card-val { font-size: 18px; font-weight: 700; }
+  .prop-card-label { font-size: 10px; color: var(--text-muted); }
+
+  /* Anomaly banner */
+  .anomaly-banner {
+    display: flex; align-items: center; gap: 12px;
+    background: var(--amber-light); border: 1px solid #fcd34d;
+    border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
+    font-size: 12px;
+  }
+  .anomaly-banner svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--amber); fill: var(--amber); }
+  .anomaly-banner strong { color: var(--text-primary); }
+
+  /* Empty / loading states */
+  .empty-state {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 60px 20px; gap: 12px;
+    color: var(--text-muted); text-align: center;
+  }
+  .empty-state svg { width: 40px; height: 40px; opacity: 0.3; }
+  .empty-state p { font-size: 13px; max-width: 260px; line-height: 1.5; }
+
+  /* Weekly report section */
+  .weekly-list { display: flex; flex-direction: column; gap: 8px; }
+  .week-row {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface-alt); border-radius: 8px; padding: 12px 14px;
+    font-size: 12px;
+  }
+  .week-row .week-label { font-weight: 600; color: var(--text-primary); }
+  .week-stats { display: flex; gap: 20px; }
+  .week-stat { text-align: right; }
+  .week-stat-val { font-weight: 600; color: var(--text-primary); }
+  .week-stat-lbl { font-size: 10px; color: var(--text-muted); }
+
+  /* Footer */
+  .footer-credit {
+    text-align: center; padding: 20px; font-size: 11px;
+    color: var(--text-muted); border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+  .footer-credit strong { color: var(--text-secondary); }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+
+  /* Responsive */
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .charts-grid { grid-template-columns: 1fr; }
+    .prop-overview { grid-template-columns: repeat(3, 1fr); }
+  }
+  @media (max-width: 768px) {
+    .sidebar { display: none; }
+    .content { padding: 16px; }
+    .tables-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════
+     AUTH SCREEN
+══════════════════════════════════════ -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    </div>
+    <h1>GSC Intelligence Dashboard</h1>
+    <p>Weekly SEO monitoring for all Impacteers properties. Connect your Google account to load live Search Console data.</p>
+
+    <div class="auth-properties">
+      <span class="auth-prop-tag">impacteers.com</span>
+      <span class="auth-prop-tag">xooper.ai</span>
+      <span class="auth-prop-tag">recruitment.impacteers.com</span>
+      <span class="auth-prop-tag">futurejobs.impacteers.com</span>
+      <span class="auth-prop-tag">examprep.impacteers.com</span>
+    </div>
+
+    <div class="setup-steps">
+      <p>One-time setup required</p>
+      <ol>
+        <li>Go to <strong>Google Cloud Console</strong> → APIs & Services → Credentials</li>
+        <li>Create an <strong>OAuth 2.0 Client ID</strong> (Web application type)</li>
+        <li>Add your GitHub Pages URL to <strong>Authorised JavaScript origins</strong></li>
+        <li>Enable <strong>Google Search Console API</strong> in your project</li>
+        <li>Paste your Client ID below and sign in</li>
+      </ol>
+    </div>
+
+    <input type="text" id="client-id-input" placeholder="Paste your OAuth Client ID (ends with .apps.googleusercontent.com)" />
+    <button class="btn-signin" id="btn-signin" onclick="initOAuth()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13 12H3"/></svg>
+      Sign in with Google
+    </button>
+    <p class="auth-note">Your data stays in your browser. No data is sent to any third-party server. Requires GSC Owner or Full User access on each property.</p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════ -->
+<div id="app">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <div class="header-logo">
+        <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+      </div>
+      <div>
+        <div class="header-title">GSC Intelligence Dashboard</div>
+        <div class="header-subtitle">Impacteers — SEO Monitoring</div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="header-user">
+        <div class="user-avatar" id="user-avatar">G</div>
+        <span id="user-name">Girish Kumar</span>
+      </div>
+      <button class="btn-signout" onclick="signOut()">Sign Out</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-label">Views</div>
+      <button class="nav-item active" onclick="setView('overview', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Overview
+      </button>
+      <button class="nav-item" onclick="setView('trends', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Trends
+      </button>
+      <button class="nav-item" onclick="setView('keywords', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Keywords
+      </button>
+      <button class="nav-item" onclick="setView('pages', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Top Pages
+      </button>
+      <button class="nav-item" onclick="setView('weekly', this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        Weekly Report
+      </button>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-label">Properties</div>
+      <div class="prop-section" id="prop-nav"></div>
+    </nav>
+
+    <!-- Content -->
+    <main class="content" id="content-area">
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <p>Click <strong>Fetch Data</strong> to load your Search Console metrics for all properties.</p>
+      </div>
+    </main>
+  </div>
+
+  <footer class="footer-credit">
+    <strong>Girish Kumar G | Programmatic SEO Manager</strong> &nbsp;·&nbsp; Father of SEO &nbsp;·&nbsp; Impacteers GSC Dashboard
+  </footer>
+</div>
+
+<script>
+// ══════════════════════════════════════
+// CONFIG
+// ══════════════════════════════════════
+const PROPERTIES = [
+  { id: 'impacteers',    url: 'sc-domain:impacteers.com',               label: 'impacteers.com',               color: '#4f46e5' },
+  { id: 'xooper',        url: 'sc-domain:xooper.ai',                    label: 'xooper.ai',                    color: '#10b981' },
+  { id: 'recruitment',   url: 'https://recruitment.impacteers.com/',    label: 'recruitment.impacteers.com',   color: '#3b82f6' },
+  { id: 'futurejobs',    url: 'https://futurejobs.impacteers.com/',     label: 'futurejobs.impacteers.com',    color: '#f59e0b' },
+  { id: 'examprep',      url: 'https://examprep.impacteers.com/',       label: 'examprep.impacteers.com',      color: '#ef4444' },
+];
+
+const GSC_API = 'https://searchconsole.googleapis.com/webmasters/v3';
+let tokenClient = null;
+let accessToken  = null;
+let activeView   = 'overview';
+let activeProp   = null; // null = all
+let dateRange    = 28;
+let gscData      = {}; // { propId: { rows, totals, weeklyRows } }
+let charts       = {};
+
+// ══════════════════════════════════════
+// OAuth
+// ══════════════════════════════════════
+function initOAuth() {
+  const clientId = document.getElementById('client-id-input').value.trim();
+  if (!clientId) { alert('Please paste your OAuth Client ID first.'); return; }
+
+  const scopes = 'https://www.googleapis.com/auth/webmasters.readonly';
+  const redirectUri = location.origin + location.pathname;
+  const state = Math.random().toString(36).slice(2);
+  sessionStorage.setItem('oauth_state', state);
+  sessionStorage.setItem('oauth_client_id', clientId);
+
+  const params = new URLSearchParams({
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    response_type: 'token',
+    scope: scopes,
+    state,
+    include_granted_scopes: 'true',
+  });
+
+  location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+}
+
+function handleOAuthCallback() {
+  const hash = new URLSearchParams(location.hash.slice(1));
+  const token = hash.get('access_token');
+  if (!token) return false;
+
+  const state = hash.get('state');
+  if (state !== sessionStorage.getItem('oauth_state')) return false;
+
+  accessToken = token;
+  history.replaceState(null, '', location.pathname);
+  return true;
+}
+
+function signOut() {
+  accessToken = null;
+  gscData = {};
+  sessionStorage.removeItem('oauth_state');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+  destroyCharts();
+}
+
+// ══════════════════════════════════════
+// STARTUP
+// ══════════════════════════════════════
+window.addEventListener('load', () => {
+  const loggedIn = handleOAuthCallback();
+  if (loggedIn) {
+    showApp();
+  }
+});
+
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+  buildPropNav();
+  renderContent();
+}
+
+function buildPropNav() {
+  const nav = document.getElementById('prop-nav');
+  nav.innerHTML = '';
+  PROPERTIES.forEach(p => {
+    const btn = document.createElement('button');
+    btn.className = 'prop-item';
+    btn.dataset.propId = p.id;
+    btn.innerHTML = `<span class="prop-dot" style="background:${p.color}"></span><span class="prop-name">${p.label}</span>`;
+    btn.onclick = () => {
+      document.querySelectorAll('.prop-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      activeProp = p.id;
+      renderContent();
+    };
+    nav.appendChild(btn);
+  });
+}
+
+// ══════════════════════════════════════
+// VIEW ROUTER
+// ══════════════════════════════════════
+function setView(view, el) {
+  activeView = view;
+  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  renderContent();
+}
+
+function renderContent() {
+  const hasData = Object.keys(gscData).length > 0;
+  const area = document.getElementById('content-area');
+
+  if (!hasData) {
+    area.innerHTML = `
+      <div class="controls-bar">
+        <div><div class="page-title">Overview</div><div class="page-subtitle">All properties — last ${dateRange} days</div></div>
+        <div class="controls-right">
+          ${rangeBtnsHTML()}
+          ${fetchBtnHTML()}
+        </div>
+      </div>
+      <div class="empty-state">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        <p>Click <strong>Fetch Data</strong> to load Search Console metrics for all properties.</p>
+      </div>`;
+    attachControls();
+    return;
+  }
+
+  const views = { overview: renderOverview, trends: renderTrends, keywords: renderKeywords, pages: renderPages, weekly: renderWeekly };
+  (views[activeView] || renderOverview)();
+}
+
+function rangeBtnsHTML() {
+  return `<div class="date-range-btns">
+    <button class="range-btn ${dateRange===7?'active':''}" onclick="setRange(7,this)">7D</button>
+    <button class="range-btn ${dateRange===28?'active':''}" onclick="setRange(28,this)">28D</button>
+    <button class="range-btn ${dateRange===90?'active':''}" onclick="setRange(90,this)">90D</button>
+  </div>`;
+}
+
+function fetchBtnHTML(loading=false) {
+  return loading
+    ? `<button class="btn-fetch" disabled><span class="spinner"></span> Fetching…</button>`
+    : `<button class="btn-fetch" id="fetch-btn" onclick="fetchAllData()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        Fetch Data
+      </button>`;
+}
+
+function attachControls() {
+  // range buttons re-bind after render; fetch btn is inline onclick
+}
+
+function setRange(r, el) {
+  dateRange = r;
+  document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  gscData = {};
+  destroyCharts();
+  fetchAllData();
+}
+
+// ══════════════════════════════════════
+// DATA FETCH
+// ══════════════════════════════════════
+async function fetchAllData() {
+  const area = document.getElementById('content-area');
+  const title = { overview:'Overview', trends:'Trends', keywords:'Keywords', pages:'Top Pages', weekly:'Weekly Report' }[activeView] || 'Overview';
+  area.innerHTML = `
+    <div class="controls-bar">
+      <div><div class="page-title">${title}</div></div>
+      <div class="controls-right">${rangeBtnsHTML()}${fetchBtnHTML(true)}</div>
+    </div>
+    <div class="empty-state"><div class="spinner" style="width:32px;height:32px;border-color:#e4e7f0;border-top-color:var(--accent)"></div><p>Fetching data from Search Console…</p></div>`;
+
+  const endDate = new Date(); endDate.setDate(endDate.getDate() - 2); // GSC has ~2 day lag
+  const startDate = new Date(); startDate.setDate(endDate.getDate() - dateRange + 1);
+  const fmt = d => d.toISOString().split('T')[0];
+  const sd = fmt(startDate), ed = fmt(endDate);
+
+  // Previous period for delta
+  const prevEnd = new Date(startDate); prevEnd.setDate(prevEnd.getDate() - 1);
+  const prevStart = new Date(prevEnd); prevStart.setDate(prevEnd.getDate() - dateRange + 1);
+  const psd = fmt(prevStart), ped = fmt(prevEnd);
+
+  gscData = {};
+
+  await Promise.all(PROPERTIES.map(async prop => {
+    try {
+      const [cur, prev, weekly, queries, pages] = await Promise.all([
+        gscQuery(prop.url, sd, ed, ['date']),
+        gscQuery(prop.url, psd, ped, ['date']),
+        gscQuery(prop.url, sd, ed, ['date']),
+        gscQuery(prop.url, sd, ed, ['query'], 15),
+        gscQuery(prop.url, sd, ed, ['page'], 10),
+      ]);
+      gscData[prop.id] = {
+        prop,
+        rows: cur.rows || [],
+        prevRows: prev.rows || [],
+        weeklyRows: buildWeekly(cur.rows || []),
+        queries: queries.rows || [],
+        pages: pages.rows || [],
+        totals: sumRows(cur.rows || []),
+        prevTotals: sumRows(prev.rows || []),
+      };
+    } catch(e) {
+      console.warn(`Failed ${prop.label}:`, e);
+      gscData[prop.id] = { prop, rows:[], prevRows:[], weeklyRows:[], queries:[], pages:[], totals:{clicks:0,impressions:0,ctr:0,position:0}, prevTotals:{clicks:0,impressions:0,ctr:0,position:0}, error: true };
+    }
+  }));
+
+  destroyCharts();
+  renderContent();
+}
+
+async function gscQuery(siteUrl, startDate, endDate, dimensions, rowLimit=500) {
+  const body = { startDate, endDate, dimensions, rowLimit, dataState:'final' };
+  const r = await fetch(`${GSC_API}/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+
+function sumRows(rows) {
+  if (!rows.length) return { clicks:0, impressions:0, ctr:0, position:0 };
+  const t = rows.reduce((a, r) => ({ clicks: a.clicks+r.clicks, impressions: a.impressions+r.impressions, ctr: a.ctr+r.ctr, position: a.position+r.position }), {clicks:0,impressions:0,ctr:0,position:0});
+  t.ctr = t.ctr / rows.length;
+  t.position = t.position / rows.length;
+  return t;
+}
+
+function buildWeekly(rows) {
+  // Group by ISO week
+  const weeks = {};
+  rows.forEach(r => {
+    const d = new Date(r.keys[0]);
+    const weekKey = getISOWeek(d);
+    if (!weeks[weekKey]) weeks[weekKey] = { label: weekKey, clicks:0, impressions:0, ctr:[], position:[] };
+    weeks[weekKey].clicks += r.clicks;
+    weeks[weekKey].impressions += r.impressions;
+    weeks[weekKey].ctr.push(r.ctr);
+    weeks[weekKey].position.push(r.position);
+  });
+  return Object.values(weeks).map(w => ({
+    ...w,
+    ctr: w.ctr.reduce((a,b)=>a+b,0)/w.ctr.length,
+    position: w.position.reduce((a,b)=>a+b,0)/w.position.length,
+  })).slice(-13);
+}
+
+function getISOWeek(d) {
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
+  const y = date.getUTCFullYear();
+  const w = Math.ceil((((date - new Date(Date.UTC(y,0,1)))/86400000) + 1) / 7);
+  return `W${String(w).padStart(2,'0')} ${y}`;
+}
+
+// ══════════════════════════════════════
+// RENDER: OVERVIEW
+// ══════════════════════════════════════
+function renderOverview() {
+  // Aggregate across all or single prop
+  const propsToShow = activeProp ? [gscData[activeProp]].filter(Boolean) : Object.values(gscData);
+  const allTotals = mergeTotals(propsToShow.map(d=>d.totals));
+  const allPrev   = mergeTotals(propsToShow.map(d=>d.prevTotals));
+
+  const area = document.getElementById('content-area');
+  area.innerHTML = `
+    <div class="controls-bar">
+      <div>
+        <div class="page-title">${activeProp ? gscData[activeProp].prop.label : 'All Properties'}</div>
+        <div class="page-subtitle">Last ${dateRange} days · GSC data</div>
+      </div>
+      <div class="controls-right">${rangeBtnsHTML()}${fetchBtnHTML()}</div>
+    </div>
+    ${anomalyBanner(propsToShow)}
+    <!-- Property strips -->
+    <div class="prop-overview" id="prop-overview-strip"></div>
+    <!-- KPIs -->
+    <div class="kpi-grid">
+      ${kpiCard('Total Clicks', allTotals.clicks, allPrev.clicks, 'clicks', '#4f46e5', clicksIcon())}
+      ${kpiCard('Impressions', allTotals.impressions, allPrev.impressions, 'impressions', '#3b82f6', impIcon())}
+      ${kpiCard('Avg CTR', (allTotals.ctr*100).toFixed(2)+'%', (allPrev.ctr*100).toFixed(2)+'%', 'ctr', '#10b981', ctrIcon(), true)}
+      ${kpiCard('Avg Position', allTotals.position.toFixed(1), allPrev.position.toFixed(1), 'position', '#f59e0b', posIcon(), false, true)}
+    </div>
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-header">
+          <div><div class="chart-title">Clicks & Impressions</div><div class="chart-subtitle">Daily trend</div></div>
+          <div class="chart-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:#4f46e5"></div>Clicks</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#e0e7ff"></div>Impressions</div>
+          </div>
+        </div>
+        <div class="chart-container"><canvas id="chart-trend"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><div><div class="chart-title">Property Split</div><div class="chart-subtitle">Clicks distribution</div></div></div>
+        <div class="chart-container-sm"><canvas id="chart-donut"></canvas></div>
+      </div>
+    </div>`;
+
+  // Property overview strip
+  const strip = document.getElementById('prop-overview-strip');
+  PROPERTIES.forEach(p => {
+    const d = gscData[p.id];
+    const card = document.createElement('div');
+    card.className = `prop-card ${activeProp===p.id?'active-prop':''}`;
+    card.innerHTML = `
+      <div class="prop-card-dot" style="background:${p.color}"></div>
+      <div class="prop-card-name">${p.label}</div>
+      <div class="prop-card-val">${d?.error ? '—' : fmtNum(d?.totals?.clicks||0)}</div>
+      <div class="prop-card-label">clicks</div>`;
+    card.onclick = () => {
+      activeProp = activeProp === p.id ? null : p.id;
+      document.querySelectorAll('.prop-item').forEach(b => b.classList.remove('active'));
+      if (activeProp) document.querySelector(`[data-prop-id="${activeProp}"]`)?.classList.add('active');
+      destroyCharts(); renderOverview();
+    };
+    strip.appendChild(card);
+  });
+
+  // Trend chart
+  const trendData = mergeRows(propsToShow);
+  const labels = trendData.map(r => {
+    const d = new Date(r.date);
+    return `${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]}`;
+  });
+
+  const ctx1 = document.getElementById('chart-trend').getContext('2d');
+  charts['trend'] = new Chart(ctx1, {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label:'Clicks', data: trendData.map(r=>r.clicks), backgroundColor:'rgba(79,70,229,0.85)', borderRadius:3, order:1 },
+        { label:'Impressions', data: trendData.map(r=>r.impressions), type:'line', borderColor:'#e0e7ff', backgroundColor:'rgba(224,231,255,0.15)', borderWidth:2, pointRadius:0, tension:0.4, fill:true, order:0, yAxisID:'y1' },
+      ]
+    },
+    options: chartOpts(true)
+  });
+
+  // Donut
+  const ctx2 = document.getElementById('chart-donut').getContext('2d');
+  charts['donut'] = new Chart(ctx2, {
+    type: 'doughnut',
+    data: {
+      labels: PROPERTIES.map(p=>p.label),
+      datasets: [{ data: PROPERTIES.map(p=>gscData[p.id]?.totals?.clicks||0), backgroundColor: PROPERTIES.map(p=>p.color), borderWidth:2, borderColor:'#fff', hoverOffset:6 }]
+    },
+    options: { responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{ legend:{ position:'bottom', labels:{ font:{family:'Poppins',size:10}, padding:10, boxWidth:10 } }, tooltip:{ callbacks:{ label: ctx => ` ${fmtNum(ctx.parsed)} clicks` } } } }
+  });
+}
+
+// ══════════════════════════════════════
+// RENDER: TRENDS
+// ══════════════════════════════════════
+function renderTrends() {
+  const area = document.getElementById('content-area');
+  area.innerHTML = `
+    <div class="controls-bar">
+      <div><div class="page-title">Trends</div><div class="page-subtitle">CTR & Position over time</div></div>
+      <div class="controls-right">${rangeBtnsHTML()}${fetchBtnHTML()}</div>
+    </div>
+    <div style="display:grid;gap:16px;">
+      <div class="chart-card">
+        <div class="chart-header"><div><div class="chart-title">Click-Through Rate</div><div class="chart-subtitle">Daily avg across all properties</div></div></div>
+        <div class="chart-container"><canvas id="chart-ctr"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-header"><div><div class="chart-title">Average Position</div><div class="chart-subtitle">Lower = better</div></div></div>
+        <div class="chart-container"><canvas id="chart-pos"></canvas></div>
+      </div>
+    </div>`;
+
+  const propsToShow = activeProp ? [gscData[activeProp]].filter(Boolean) : Object.values(gscData);
+  const merged = mergeRows(propsToShow);
+  const labels = merged.map(r=>{const d=new Date(r.date);return `${d.getDate()}/${d.getMonth()+1}`;});
+
+  const ctrCtx = document.getElementById('chart-ctr').getContext('2d');
+  charts['ctr'] = new Chart(ctrCtx, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[{ label:'CTR %', data:merged.map(r=>(r.ctr*100).toFixed(2)), borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.08)', borderWidth:2, tension:0.4, pointRadius:2, fill:true }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y}%`}}}, scales:{x:{grid:{display:false},ticks:{font:{family:'Poppins',size:10},maxTicksLimit:14}},y:{grid:{color:'#f0f2f9'},ticks:{font:{family:'Poppins',size:10},callback:v=>`${v}%`}}} }
+  });
+
+  const posCtx = document.getElementById('chart-pos').getContext('2d');
+  charts['pos'] = new Chart(posCtx, {
+    type:'line',
+    data:{
+      labels,
+      datasets:[{ label:'Avg Position', data:merged.map(r=>r.position.toFixed(1)), borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.08)', borderWidth:2, tension:0.4, pointRadius:2, fill:true }]
+    },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{font:{family:'Poppins',size:10},maxTicksLimit:14}},y:{reverse:true,grid:{color:'#f0f2f9'},ticks:{font:{family:'Poppins',size:10}}}} }
+  });
+}
+
+// ══════════════════════════════════════
+// RENDER: KEYWORDS
+// ══════════════════════════════════════
+function renderKeywords() {
+  const propsToShow = activeProp ? [gscData[activeProp]].filter(Boolean) : Object.values(gscData);
+  const allQueries = {};
+  propsToShow.forEach(d => {
+    (d.queries||[]).forEach(r => {
+      const q = r.keys[0];
+      if (!allQueries[q]) allQueries[q] = { query:q, clicks:0, impressions:0, ctr:[], position:[] };
+      allQueries[q].clicks += r.clicks;
+      allQueries[q].impressions += r.impressions;
+      allQueries[q].ctr.push(r.ctr);
+      allQueries[q].position.push(r.position);
+    });
+  });
+  const sorted = Object.values(allQueries)
+    .map(q=>({...q, ctr:q.ctr.reduce((a,b)=>a+b,0)/q.ctr.length, position:q.position.reduce((a,b)=>a+b,0)/q.position.length}))
+    .sort((a,b)=>b.clicks-a.clicks).slice(0,20);
+
+  const area = document.getElementById('content-area');
+  area.innerHTML = `
+    <div class="controls-bar">
+      <div><div class="page-title">Keywords</div><div class="page-subtitle">Top 20 queries · last ${dateRange} days</div></div>
+      <div class="controls-right">${rangeBtnsHTML()}${fetchBtnHTML()}</div>
+    </div>
+    <div class="table-card">
+      <table>
+        <thead><tr>
+          <th>#</th><th>Query</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Position</th>
+        </tr></thead>
+        <tbody>
+          ${sorted.map((r,i)=>`<tr>
+            <td style="color:var(--text-muted);font-size:11px">${i+1}</td>
+            <td class="td-primary">${r.query}</td>
+            <td><strong>${fmtNum(r.clicks)}</strong></td>
+            <td>${fmtNum(r.impressions)}</td>
+            <td>${(r.ctr*100).toFixed(2)}%</td>
+            <td>${posBadge(r.position)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ══════════════════════════════════════
+// RENDER: PAGES
+// ══════════════════════════════════════
+function renderPages() {
+  const propsToShow = activeProp ? [gscData[activeProp]].filter(Boolean) : Object.values(gscData);
+  const allPages = {};
+  propsToShow.forEach(d => {
+    (d.pages||[]).forEach(r => {
+      const url = r.keys[0];
+      if (!allPages[url]) allPages[url] = { url, clicks:0, impressions:0, ctr:[], position:[] };
+      allPages[url].clicks += r.clicks;
+      allPages[url].impressions += r.impressions;
+      allPages[url].ctr.push(r.ctr);
+      allPages[url].position.push(r.position);
+    });
+  });
+  const sorted = Object.values(allPages)
+    .map(p=>({...p, ctr:p.ctr.reduce((a,b)=>a+b,0)/p.ctr.length, position:p.position.reduce((a,b)=>a+b,0)/p.position.length}))
+    .sort((a,b)=>b.clicks-a.clicks);
+
+  const area = document.getElementById('content-area');
+  area.innerHTML = `
+    <div class="controls-bar">
+      <div><div class="page-title">Top Pages</div><div class="page-subtitle">By clicks · last ${dateRange} days</div></div>
+      <div class="controls-right">${rangeBtnsHTML()}${fetchBtnHTML()}</div>
+    </div>
+    <div class="table-card">
+      <table>
+        <thead><tr>
+          <th>#</th><th>URL</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Position</th>
+        </tr></thead>
+        <tbody>
+          ${sorted.map((r,i)=>`<tr>
+            <td style="color:var(--text-muted);font-size:11px">${i+1}</td>
+            <td class="td-url td-primary" title="${r.url}">${r.url.replace(/https?:\/\/[^/]+/,'')}</td>
+            <td><strong>${fmtNum(r.clicks)}</strong></td>
+            <td>${fmtNum(r.impressions)}</td>
+            <td>${(r.ctr*100).toFixed(2)}%</td>
+            <td>${posBadge(r.position)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
+}
+
+// ══════════════════════════════════════
+// RENDER: WEEKLY REPORT
+// ══════════════════════════════════════
+function renderWeekly() {
+  const propsToShow = activeProp ? [gscData[activeProp]].filter(Boolean) : Object.values(gscData);
+  const area = document.getElementById('content-area');
+
+  // Aggregate weekly across props
+  const weekMap = {};
+  propsToShow.forEach(d => {
+    (d.weeklyRows||[]).forEach(w => {
+      if (!weekMap[w.label]) weekMap[w.label] = { label:w.label, clicks:0, impressions:0, count:0 };
+      weekMap[w.label].clicks += w.clicks;
+      weekMap[w.label].impressions += w.impressions;
+      weekMap[w.label].count++;
+    });
+  });
+  const weeks = Object.values(weekMap).slice(-8).reverse();
+
+  area.innerHTML = `
+    <div class="controls-bar">
+      <div><div class="page-title">Weekly Report</div><div class="page-subtitle">GSC weekly digest · Q2 tracking</div></div>
+      <div class="controls-right">${rangeBtnsHTML()}${fetchBtnHTML()}</div>
+    </div>
+    <div class="chart-card" style="margin-bottom:16px">
+      <div class="chart-header"><div><div class="chart-title">Weekly Clicks</div><div class="chart-subtitle">Week-by-week performance</div></div></div>
+      <div class="chart-container"><canvas id="chart-weekly"></canvas></div>
+    </div>
+    <div class="table-card">
+      <div class="table-header"><div class="chart-title">Weekly Breakdown</div></div>
+      <div class="weekly-list">
+        ${weeks.map((w,i)=>`
+          <div class="week-row">
+            <span class="week-label">${w.label}</span>
+            <div class="week-stats">
+              <div class="week-stat"><div class="week-stat-val">${fmtNum(w.clicks)}</div><div class="week-stat-lbl">Clicks</div></div>
+              <div class="week-stat"><div class="week-stat-val">${fmtNum(w.impressions)}</div><div class="week-stat-lbl">Impressions</div></div>
+              ${i>0 && weeks[i-1] ? `<div class="week-stat"><div class="week-stat-val" style="color:${w.clicks>=weeks[i-1].clicks?'var(--green)':'var(--red)'}">${w.clicks>=weeks[i-1].clicks?'↑':'↓'} ${Math.abs(Math.round((w.clicks-weeks[i-1].clicks)/(weeks[i-1].clicks||1)*100))}%</div><div class="week-stat-lbl">vs prev</div></div>` : ''}
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  const ctx = document.getElementById('chart-weekly').getContext('2d');
+  const wReverse = [...weeks].reverse();
+  charts['weekly'] = new Chart(ctx, {
+    type:'bar',
+    data:{
+      labels: wReverse.map(w=>w.label),
+      datasets:[
+        { label:'Clicks', data:wReverse.map(w=>w.clicks), backgroundColor:'rgba(79,70,229,0.85)', borderRadius:4 },
+        { label:'Impressions', data:wReverse.map(w=>w.impressions), type:'line', borderColor:'#93c5fd', borderWidth:2, pointRadius:2, tension:0.4, yAxisID:'y1' },
+      ]
+    },
+    options: chartOpts(true)
+  });
+}
+
+// ══════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════
+function mergeTotals(totals) {
+  const t = totals.reduce((a,b)=>({ clicks:a.clicks+b.clicks, impressions:a.impressions+b.impressions, ctr:a.ctr+b.ctr, position:a.position+b.position }), {clicks:0,impressions:0,ctr:0,position:0});
+  const n = totals.filter(t=>t.clicks>0).length || 1;
+  t.ctr /= n; t.position /= n;
+  return t;
+}
+
+function mergeRows(propDataArr) {
+  const dayMap = {};
+  propDataArr.forEach(d => {
+    (d.rows||[]).forEach(r => {
+      const date = r.keys[0];
+      if (!dayMap[date]) dayMap[date] = { date, clicks:0, impressions:0, ctr:[], position:[] };
+      dayMap[date].clicks += r.clicks;
+      dayMap[date].impressions += r.impressions;
+      dayMap[date].ctr.push(r.ctr);
+      dayMap[date].position.push(r.position);
+    });
+  });
+  return Object.values(dayMap)
+    .sort((a,b)=>a.date.localeCompare(b.date))
+    .map(d=>({...d, ctr:d.ctr.reduce((a,b)=>a+b,0)/d.ctr.length, position:d.position.reduce((a,b)=>a+b,0)/d.position.length}));
+}
+
+function kpiCard(label, val, prevVal, type, color, icon, isPct=false, isPos=false) {
+  const numVal = parseFloat(String(val).replace('%',''));
+  const numPrev = parseFloat(String(prevVal).replace('%',''));
+  const delta = numPrev ? ((numVal-numPrev)/numPrev*100) : 0;
+  const isUp = isPos ? delta < 0 : delta > 0; // for position, lower is better
+  const sign = delta > 0 ? '+' : '';
+  const cls = delta === 0 ? 'neutral' : (isUp ? 'up' : 'down');
+  const arrow = delta === 0 ? '—' : (isUp ? '↑' : '↓');
+  return `<div class="kpi-card">
+    <div class="kpi-label" style="color:${color}">${icon} ${label}</div>
+    <div class="kpi-value">${typeof val === 'number' ? fmtNum(val) : val}</div>
+    <div class="kpi-change ${cls}">${arrow} ${sign}${delta.toFixed(1)}% vs prev period</div>
+  </div>`;
+}
+
+function anomalyBanner(propsToShow) {
+  const anomalies = [];
+  propsToShow.forEach(d => {
+    if (!d.rows?.length) return;
+    const recent = d.rows.slice(-3);
+    const avgClicks = d.totals.clicks / (d.rows.length||1);
+    const recentAvg = recent.reduce((a,r)=>a+r.clicks,0)/3;
+    if (avgClicks > 0 && recentAvg < avgClicks * 0.6) {
+      anomalies.push(`<strong>${d.prop.label}</strong> shows a recent click drop (last 3 days avg vs overall avg).`);
+    }
+  });
+  if (!anomalies.length) return '';
+  return `<div class="anomaly-banner">
+    <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <div>⚠ Anomaly detected: ${anomalies.join(' · ')}</div>
+  </div>`;
+}
+
+function posBadge(pos) {
+  const cls = pos <= 10 ? 'pos-good' : pos <= 20 ? 'pos-mid' : 'pos-low';
+  return `<span class="position-badge ${cls}">${pos.toFixed(1)}</span>`;
+}
+
+function fmtNum(n) {
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000) return (n/1000).toFixed(1)+'K';
+  return Math.round(n).toLocaleString();
+}
+
+function chartOpts(dualAxis=false) {
+  const base = {
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false}, tooltip:{ mode:'index', intersect:false, titleFont:{family:'Poppins'}, bodyFont:{family:'Poppins',size:12} } },
+    scales:{
+      x:{ grid:{display:false}, ticks:{ font:{family:'Poppins',size:10}, maxTicksLimit:10 } },
+      y:{ grid:{color:'#f0f2f9'}, ticks:{ font:{family:'Poppins',size:10}, callback:v=>fmtNum(v) } },
+    }
+  };
+  if (dualAxis) base.scales.y1 = { position:'right', grid:{display:false}, ticks:{ font:{family:'Poppins',size:10}, callback:v=>fmtNum(v) } };
+  return base;
+}
+
+function destroyCharts() {
+  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
+  charts = {};
+}
+
+// Icons
+const clicksIcon = () => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`;
+const impIcon    = () => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const ctrIcon    = () => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>`;
+const posIcon    = () => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/></svg>`;
+</script>
+</body>
+</html>
