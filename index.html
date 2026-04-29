@@ -3,1172 +3,1029 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>GSC Intelligence Dashboard — Impacteers</title>
+<title>GSC Intelligence Dashboard v2 — Impacteers</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
-  :root {
-    --bg: #f7f8fc;
-    --surface: #ffffff;
-    --surface-alt: #f0f2f9;
-    --border: #e4e7f0;
-    --text-primary: #1a1d2e;
-    --text-secondary: #6b7280;
-    --text-muted: #9ca3af;
-    --accent: #4f46e5;
-    --accent-light: #eef2ff;
-    --accent-hover: #4338ca;
-    --green: #10b981;
-    --green-light: #ecfdf5;
-    --red: #ef4444;
-    --red-light: #fef2f2;
-    --amber: #f59e0b;
-    --amber-light: #fffbeb;
-    --blue: #3b82f6;
-    --blue-light: #eff6ff;
-    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-    --shadow: 0 4px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
-    --shadow-lg: 0 8px 32px rgba(0,0,0,0.10);
-    --radius: 14px;
-    --radius-sm: 8px;
-  }
+:root {
+  --bg:#f7f8fc; --surface:#fff; --surface-alt:#f0f2f9; --border:#e4e7f0;
+  --tp:#1a1d2e; --ts:#6b7280; --tm:#9ca3af;
+  --accent:#4f46e5; --al:#eef2ff; --ah:#4338ca;
+  --green:#10b981; --gl:#ecfdf5;
+  --red:#ef4444; --rl:#fef2f2;
+  --amber:#f59e0b; --ambl:#fffbeb;
+  --blue:#3b82f6; --bl:#eff6ff;
+  --purple:#8b5cf6; --pl:#f5f3ff;
+  --ss:0 1px 3px rgba(0,0,0,.06); --sm:0 4px 16px rgba(0,0,0,.07); --sl:0 8px 32px rgba(0,0,0,.10);
+  --r:14px; --rs:8px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--tp);min-height:100vh;font-size:14px;}
 
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+/* AUTH */
+#auth-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:linear-gradient(135deg,#f7f8fc,#eef2ff);}
+.auth-card{background:var(--surface);border-radius:20px;padding:44px 40px;max-width:520px;width:100%;box-shadow:var(--sl);text-align:center;}
+.auth-logo{width:52px;height:52px;background:var(--accent);border-radius:14px;display:inline-flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.auth-logo svg{width:26px;height:26px;fill:white;}
+.auth-card h1{font-size:20px;font-weight:700;margin-bottom:6px;}
+.auth-card>p{color:var(--ts);font-size:12px;line-height:1.6;margin-bottom:24px;}
+.auth-tags{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:24px;}
+.auth-tag{background:var(--al);color:var(--accent);font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;}
+.setup-box{text-align:left;background:var(--surface-alt);border-radius:10px;padding:14px 16px;margin-bottom:20px;}
+.setup-box .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--ts);margin-bottom:8px;}
+.setup-box ol{padding-left:16px;}
+.setup-box li{font-size:11px;color:var(--ts);margin-bottom:5px;line-height:1.5;}
+.setup-box code{background:var(--border);padding:1px 5px;border-radius:4px;font-size:10px;font-family:monospace;}
+.inp{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Poppins',sans-serif;font-size:12px;margin-bottom:8px;outline:none;color:var(--tp);transition:border .2s;}
+.inp:focus{border-color:var(--accent);}
+.inp::placeholder{color:var(--tm);}
+.inp-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+.btn-signin{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:white;border:none;border-radius:10px;padding:13px 24px;font-family:'Poppins',sans-serif;font-size:13px;font-weight:600;cursor:pointer;width:100%;justify-content:center;transition:background .2s,transform .1s;}
+.btn-signin:hover{background:var(--ah);transform:translateY(-1px);}
+.auth-note{margin-top:14px;font-size:10px;color:var(--tm);line-height:1.6;}
 
-  body {
-    font-family: 'Poppins', sans-serif;
-    background: var(--bg);
-    color: var(--text-primary);
-    min-height: 100vh;
-    font-size: 14px;
-  }
+/* APP */
+#app{display:none;}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;display:flex;align-items:center;justify-content:space-between;height:60px;position:sticky;top:0;z-index:100;box-shadow:var(--ss);}
+.hlogo{width:34px;height:34px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;}
+.hlogo svg{width:17px;height:17px;fill:white;}
+.htitle{font-size:14px;font-weight:700;}
+.hsub{font-size:10px;color:var(--tm);}
+.hright{display:flex;align-items:center;gap:10px;}
+.prop-switcher{display:flex;gap:4px;align-items:center;}
+.prop-btn{padding:5px 10px;border-radius:6px;border:1.5px solid var(--border);background:var(--surface);font-family:'Poppins',sans-serif;font-size:11px;font-weight:500;color:var(--ts);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.prop-btn:hover{border-color:var(--accent);color:var(--accent);}
+.prop-btn.active{border-color:var(--accent);background:var(--accent);color:white;}
+.uavatar{width:28px;height:28px;border-radius:50%;background:var(--al);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--accent);overflow:hidden;}
+.uavatar img{width:100%;height:100%;object-fit:cover;}
+.btn-so{background:none;border:1.5px solid var(--border);border-radius:7px;padding:5px 10px;font-family:'Poppins',sans-serif;font-size:11px;color:var(--ts);cursor:pointer;transition:all .2s;}
+.btn-so:hover{border-color:var(--red);color:var(--red);}
 
-  /* ── AUTH SCREEN ── */
-  #auth-screen {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 24px;
-    background: linear-gradient(135deg, #f7f8fc 0%, #eef2ff 100%);
-  }
-  .auth-card {
-    background: var(--surface);
-    border-radius: 20px;
-    padding: 52px 48px;
-    max-width: 440px;
-    width: 100%;
-    box-shadow: var(--shadow-lg);
-    text-align: center;
-  }
-  .auth-logo {
-    width: 56px; height: 56px;
-    background: var(--accent);
-    border-radius: 16px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 24px;
-  }
-  .auth-logo svg { width: 28px; height: 28px; fill: white; }
-  .auth-card h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
-  .auth-card p { color: var(--text-secondary); font-size: 13px; line-height: 1.6; margin-bottom: 32px; }
-  .auth-properties {
-    display: flex; flex-wrap: wrap; gap: 8px;
-    justify-content: center; margin-bottom: 32px;
-  }
-  .auth-prop-tag {
-    background: var(--accent-light); color: var(--accent);
-    font-size: 11px; font-weight: 600;
-    padding: 4px 10px; border-radius: 20px;
-  }
-  .btn-signin {
-    display: inline-flex; align-items: center; gap: 10px;
-    background: var(--accent); color: white;
-    border: none; border-radius: 10px;
-    padding: 14px 28px; font-family: 'Poppins', sans-serif;
-    font-size: 14px; font-weight: 600; cursor: pointer;
-    transition: background 0.2s, transform 0.1s;
-    width: 100%; justify-content: center;
-  }
-  .btn-signin:hover { background: var(--accent-hover); transform: translateY(-1px); }
-  .btn-signin:active { transform: translateY(0); }
-  .btn-signin svg { width: 18px; height: 18px; }
-  .auth-note {
-    margin-top: 20px; font-size: 11px; color: var(--text-muted);
-    line-height: 1.6;
-  }
-  .setup-steps {
-    text-align: left; margin-bottom: 28px;
-    background: var(--surface-alt); border-radius: 10px; padding: 16px;
-  }
-  .setup-steps p { font-size: 11px; font-weight: 600; color: var(--text-secondary); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
-  .setup-steps ol { padding-left: 16px; }
-  .setup-steps li { font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; line-height: 1.5; }
-  .setup-steps code { background: var(--border); padding: 1px 5px; border-radius: 4px; font-size: 11px; font-family: monospace; }
-  #client-id-input {
-    width: 100%; padding: 10px 14px; border: 1.5px solid var(--border);
-    border-radius: 8px; font-family: 'Poppins', sans-serif; font-size: 12px;
-    margin-bottom: 12px; outline: none; transition: border 0.2s;
-    color: var(--text-primary);
-  }
-  #client-id-input:focus { border-color: var(--accent); }
-  #client-id-input::placeholder { color: var(--text-muted); }
+.main{display:flex;height:calc(100vh - 60px);}
+.sidebar{width:200px;background:var(--surface);border-right:1px solid var(--border);padding:16px 10px;overflow-y:auto;flex-shrink:0;}
+.slbl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tm);padding:0 8px;margin-bottom:6px;margin-top:4px;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:7px;cursor:pointer;font-size:12px;font-weight:500;color:var(--ts);transition:all .15s;margin-bottom:1px;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{background:var(--surface-alt);color:var(--tp);}
+.nav-item.active{background:var(--al);color:var(--accent);font-weight:600;}
+.nav-item svg{width:14px;height:14px;flex-shrink:0;}
+.nav-badge{margin-left:auto;background:var(--red);color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px;}
+.sdiv{height:1px;background:var(--border);margin:10px 8px;}
 
-  /* ── MAIN APP ── */
-  #app { display: none; }
+.content{flex:1;overflow-y:auto;padding:24px 28px;background:var(--bg);}
+.cbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;gap:12px;flex-wrap:wrap;}
+.ptitle{font-size:18px;font-weight:700;}
+.psub{font-size:11px;color:var(--tm);margin-top:2px;}
+.cright{display:flex;align-items:center;gap:8px;}
+.rbtn-grp{display:flex;gap:3px;}
+.rbtn{padding:5px 10px;border-radius:5px;border:1.5px solid var(--border);background:var(--surface);font-family:'Poppins',sans-serif;font-size:11px;font-weight:500;color:var(--ts);cursor:pointer;transition:all .15s;}
+.rbtn:hover{border-color:var(--accent);color:var(--accent);}
+.rbtn.active{border-color:var(--accent);background:var(--accent);color:white;}
+.btn-fetch{padding:7px 16px;border-radius:7px;border:none;background:var(--accent);color:white;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.btn-fetch:hover{background:var(--ah);transform:translateY(-1px);}
+.btn-fetch:disabled{opacity:.6;cursor:not-allowed;transform:none;}
+.btn-export{padding:7px 14px;border-radius:7px;border:1.5px solid var(--green);background:var(--gl);color:var(--green);font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.btn-export:hover{background:var(--green);color:white;}
+.spinner{width:12px;height:12px;border:2px solid rgba(255,255,255,.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-  /* Header */
-  .header {
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    padding: 0 32px;
-    display: flex; align-items: center; justify-content: space-between;
-    height: 64px;
-    position: sticky; top: 0; z-index: 100;
-    box-shadow: var(--shadow-sm);
-  }
-  .header-left { display: flex; align-items: center; gap: 12px; }
-  .header-logo {
-    width: 36px; height: 36px; background: var(--accent);
-    border-radius: 10px; display: flex; align-items: center; justify-content: center;
-  }
-  .header-logo svg { width: 18px; height: 18px; fill: white; }
-  .header-title { font-size: 15px; font-weight: 700; color: var(--text-primary); }
-  .header-subtitle { font-size: 11px; color: var(--text-muted); font-weight: 400; }
-  .header-right { display: flex; align-items: center; gap: 12px; }
-  .header-user {
-    display: flex; align-items: center; gap: 8px;
-    font-size: 12px; color: var(--text-secondary);
-  }
-  .user-avatar {
-    width: 30px; height: 30px; border-radius: 50%;
-    background: var(--accent-light); display: flex; align-items: center; justify-content: center;
-    font-size: 12px; font-weight: 700; color: var(--accent);
-    overflow: hidden;
-  }
-  .user-avatar img { width: 100%; height: 100%; object-fit: cover; }
-  .btn-signout {
-    background: none; border: 1.5px solid var(--border); border-radius: 8px;
-    padding: 6px 12px; font-family: 'Poppins', sans-serif; font-size: 12px;
-    color: var(--text-secondary); cursor: pointer; transition: all 0.2s;
-  }
-  .btn-signout:hover { border-color: var(--red); color: var(--red); }
+/* KPIs */
+.kpi-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:20px;}
+.kpi{background:var(--surface);border-radius:var(--r);padding:16px;box-shadow:var(--ss);border:1px solid var(--border);transition:box-shadow .2s,transform .2s;}
+.kpi:hover{box-shadow:var(--sm);transform:translateY(-2px);}
+.kpi-lbl{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--tm);margin-bottom:6px;display:flex;align-items:center;gap:5px;}
+.kpi-lbl svg{width:11px;height:11px;}
+.kpi-val{font-size:22px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px;line-height:1;}
+.kpi-delta{font-size:10px;font-weight:500;display:flex;align-items:center;gap:3px;}
+.up{color:var(--green);} .down{color:var(--red);} .neu{color:var(--tm);}
 
-  /* Main layout */
-  .main { display: flex; height: calc(100vh - 64px); }
+/* Tables */
+.tcard{background:var(--surface);border-radius:var(--r);padding:18px;box-shadow:var(--ss);border:1px solid var(--border);margin-bottom:16px;}
+.thead-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.tc-title{font-size:13px;font-weight:600;}
+.tc-sub{font-size:10px;color:var(--tm);}
+table{width:100%;border-collapse:collapse;}
+th{text-align:left;font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tm);padding:0 8px 8px;border-bottom:1px solid var(--border);}
+th:last-child{text-align:right;}
+td{padding:8px;font-size:11px;color:var(--ts);border-bottom:1px solid var(--surface-alt);vertical-align:middle;}
+td:last-child{text-align:right;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface-alt);}
+.td-p{color:var(--tp);font-weight:500;}
+.td-url{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.pbadge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600;min-width:30px;text-align:center;}
+.pg{background:var(--gl);color:var(--green);}
+.pm{background:var(--ambl);color:var(--amber);}
+.pr{background:var(--rl);color:var(--red);}
+.tag{display:inline-block;padding:2px 7px;border-radius:4px;font-size:10px;font-weight:500;}
 
-  /* Sidebar */
-  .sidebar {
-    width: 220px; background: var(--surface);
-    border-right: 1px solid var(--border);
-    padding: 20px 12px;
-    overflow-y: auto; flex-shrink: 0;
-  }
-  .sidebar-label {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.8px; color: var(--text-muted);
-    padding: 0 8px; margin-bottom: 8px;
-  }
-  .nav-item {
-    display: flex; align-items: center; gap: 10px;
-    padding: 9px 10px; border-radius: 8px; cursor: pointer;
-    font-size: 13px; font-weight: 500; color: var(--text-secondary);
-    transition: all 0.15s; margin-bottom: 2px;
-    border: none; background: none; width: 100%; text-align: left;
-  }
-  .nav-item:hover { background: var(--surface-alt); color: var(--text-primary); }
-  .nav-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
-  .nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
-  .sidebar-divider { height: 1px; background: var(--border); margin: 12px 8px; }
-  .prop-section { margin-top: 4px; }
-  .prop-item {
-    display: flex; align-items: center; gap: 8px;
-    padding: 8px 10px; border-radius: 8px; cursor: pointer;
-    font-size: 12px; color: var(--text-secondary);
-    transition: all 0.15s; margin-bottom: 2px;
-    border: none; background: none; width: 100%; text-align: left;
-  }
-  .prop-item:hover { background: var(--surface-alt); color: var(--text-primary); }
-  .prop-item.active { background: var(--accent-light); color: var(--accent); font-weight: 600; }
-  .prop-dot {
-    width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
-  }
-  .prop-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Charts */
+.chart-grid-2{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:16px;}
+.chart-grid-1{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:16px;}
+.chart-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:16px;}
+.ccard{background:var(--surface);border-radius:var(--r);padding:18px;box-shadow:var(--ss);border:1px solid var(--border);}
+.cheader{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px;}
+.ctitle{font-size:13px;font-weight:600;}
+.csub{font-size:10px;color:var(--tm);margin-top:2px;}
+.ch{position:relative;height:200px;}
+.ch-lg{position:relative;height:240px;}
 
-  /* Content */
-  .content {
-    flex: 1; overflow-y: auto;
-    padding: 28px 32px;
-    background: var(--bg);
-  }
+/* Alert badges */
+.alert-list{display:flex;flex-direction:column;gap:8px;}
+.alert-row{display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border-radius:9px;font-size:12px;border:1px solid;}
+.alert-crit{background:#fff1f2;border-color:#fecaca;}
+.alert-warn{background:var(--ambl);border-color:#fde68a;}
+.alert-info{background:var(--bl);border-color:#bfdbfe;}
+.alert-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.alert-body strong{color:var(--tp);display:block;margin-bottom:2px;}
+.alert-body span{color:var(--ts);line-height:1.4;}
+.alert-fix{margin-top:5px;font-size:10px;background:rgba(0,0,0,.05);padding:4px 8px;border-radius:4px;color:var(--ts);font-family:monospace;}
 
-  /* Controls bar */
-  .controls-bar {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 24px; gap: 16px; flex-wrap: wrap;
-  }
-  .page-title { font-size: 20px; font-weight: 700; }
-  .page-subtitle { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-  .controls-right { display: flex; align-items: center; gap: 10px; }
-  .date-range-btns { display: flex; gap: 4px; }
-  .range-btn {
-    padding: 6px 12px; border-radius: 6px; border: 1.5px solid var(--border);
-    background: var(--surface); font-family: 'Poppins', sans-serif;
-    font-size: 12px; font-weight: 500; color: var(--text-secondary);
-    cursor: pointer; transition: all 0.15s;
-  }
-  .range-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .range-btn.active { border-color: var(--accent); background: var(--accent); color: white; }
-  .btn-fetch {
-    padding: 8px 18px; border-radius: 8px; border: none;
-    background: var(--accent); color: white;
-    font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 600;
-    cursor: pointer; transition: all 0.2s;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .btn-fetch:hover { background: var(--accent-hover); transform: translateY(-1px); }
-  .btn-fetch:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-  .btn-fetch svg { width: 14px; height: 14px; }
-  .spinner {
-    width: 14px; height: 14px;
-    border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: white;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-  }
-  @keyframes spin { to { transform: rotate(360deg); } }
+/* CWV */
+.cwv-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.cwv-card{background:var(--surface);border-radius:var(--r);padding:14px;box-shadow:var(--ss);border:1px solid var(--border);text-align:center;}
+.cwv-metric{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tm);margin-bottom:6px;}
+.cwv-val{font-size:20px;font-weight:700;margin-bottom:4px;}
+.cwv-status{font-size:10px;font-weight:600;padding:2px 8px;border-radius:10px;}
+.cwv-good{color:var(--green);background:var(--gl);}
+.cwv-ni{color:var(--amber);background:var(--ambl);}
+.cwv-poor{color:var(--red);background:var(--rl);}
 
-  /* KPI Cards */
-  .kpi-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    gap: 16px; margin-bottom: 24px;
-  }
-  .kpi-card {
-    background: var(--surface); border-radius: var(--radius);
-    padding: 20px; box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border);
-    transition: box-shadow 0.2s, transform 0.2s;
-  }
-  .kpi-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
-  .kpi-label {
-    font-size: 11px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.5px; color: var(--text-muted); margin-bottom: 8px;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .kpi-label svg { width: 13px; height: 13px; }
-  .kpi-value {
-    font-size: 26px; font-weight: 700; letter-spacing: -0.5px;
-    margin-bottom: 6px; line-height: 1;
-  }
-  .kpi-change {
-    font-size: 11px; font-weight: 500;
-    display: flex; align-items: center; gap: 4px;
-  }
-  .kpi-change.up { color: var(--green); }
-  .kpi-change.down { color: var(--red); }
-  .kpi-change.neutral { color: var(--text-muted); }
+/* Opportunity */
+.opp-row td:nth-child(3){font-weight:700;color:var(--accent);}
+.priority-high{background:var(--rl);color:var(--red);}
+.priority-mid{background:var(--ambl);color:var(--amber);}
+.priority-low{background:var(--gl);color:var(--green);}
 
-  /* Charts grid */
-  .charts-grid {
-    display: grid; grid-template-columns: 2fr 1fr;
-    gap: 16px; margin-bottom: 24px;
-  }
-  .chart-card {
-    background: var(--surface); border-radius: var(--radius);
-    padding: 20px; box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border);
-  }
-  .chart-header {
-    display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 16px;
-  }
-  .chart-title { font-size: 14px; font-weight: 600; }
-  .chart-subtitle { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
-  .chart-legend { display: flex; gap: 14px; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-secondary); }
-  .legend-dot { width: 8px; height: 8px; border-radius: 2px; }
-  .chart-container { position: relative; height: 220px; }
-  .chart-container-sm { position: relative; height: 200px; }
+/* Segments */
+.seg-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+.seg-bar{display:flex;flex-direction:column;gap:6px;margin-top:10px;}
+.seg-item{display:flex;align-items:center;gap:8px;font-size:11px;}
+.seg-label{width:80px;color:var(--ts);text-align:right;flex-shrink:0;}
+.seg-track{flex:1;height:8px;background:var(--surface-alt);border-radius:4px;overflow:hidden;}
+.seg-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+.seg-pct{width:40px;font-weight:600;color:var(--tp);}
 
-  /* Tables */
-  .tables-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 16px; margin-bottom: 24px;
-  }
-  .table-card {
-    background: var(--surface); border-radius: var(--radius);
-    padding: 20px; box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border);
-  }
-  .table-header { margin-bottom: 14px; }
-  table { width: 100%; border-collapse: collapse; }
-  th {
-    text-align: left; font-size: 10px; font-weight: 700;
-    text-transform: uppercase; letter-spacing: 0.5px;
-    color: var(--text-muted); padding: 0 8px 10px;
-    border-bottom: 1px solid var(--border);
-  }
-  th:last-child { text-align: right; }
-  td {
-    padding: 9px 8px; font-size: 12px; color: var(--text-secondary);
-    border-bottom: 1px solid var(--surface-alt);
-    vertical-align: middle;
-  }
-  td:last-child { text-align: right; }
-  tr:last-child td { border-bottom: none; }
-  tr:hover td { background: var(--surface-alt); }
-  .td-primary { color: var(--text-primary); font-weight: 500; }
-  .td-url {
-    max-width: 200px; overflow: hidden;
-    text-overflow: ellipsis; white-space: nowrap;
-  }
-  .position-badge {
-    display: inline-block; padding: 2px 7px; border-radius: 4px;
-    font-size: 11px; font-weight: 600; min-width: 32px; text-align: center;
-  }
-  .pos-good { background: var(--green-light); color: var(--green); }
-  .pos-mid { background: var(--amber-light); color: var(--amber); }
-  .pos-low { background: var(--red-light); color: var(--red); }
+/* Sheets modal */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center;}
+.modal-bg.open{display:flex;}
+.modal{background:var(--surface);border-radius:16px;padding:28px;max-width:440px;width:100%;box-shadow:var(--sl);}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:6px;}
+.modal p{font-size:12px;color:var(--ts);margin-bottom:16px;line-height:1.5;}
+.modal-btns{display:flex;gap:8px;justify-content:flex-end;}
+.mbtn{padding:8px 16px;border-radius:7px;border:none;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;}
+.mbtn-cancel{background:var(--surface-alt);color:var(--ts);}
+.mbtn-confirm{background:var(--accent);color:white;}
+.mbtn-confirm:hover{background:var(--ah);}
 
-  /* Property overview cards */
-  .prop-overview {
-    display: grid; grid-template-columns: repeat(5, 1fr);
-    gap: 12px; margin-bottom: 24px;
-  }
-  .prop-card {
-    background: var(--surface); border-radius: var(--radius);
-    padding: 16px; box-shadow: var(--shadow-sm);
-    border: 1px solid var(--border); cursor: pointer;
-    transition: all 0.2s;
-  }
-  .prop-card:hover { box-shadow: var(--shadow); transform: translateY(-2px); }
-  .prop-card.active-prop { border-color: var(--accent); background: var(--accent-light); }
-  .prop-card-dot { width: 10px; height: 10px; border-radius: 50%; margin-bottom: 10px; }
-  .prop-card-name { font-size: 11px; font-weight: 600; margin-bottom: 10px; color: var(--text-primary); line-height: 1.3; }
-  .prop-card-val { font-size: 18px; font-weight: 700; }
-  .prop-card-label { font-size: 10px; color: var(--text-muted); }
+/* Empty */
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:50px 20px;gap:10px;color:var(--tm);text-align:center;}
+.empty svg{width:36px;height:36px;opacity:.3;}
+.empty p{font-size:12px;max-width:240px;line-height:1.5;}
 
-  /* Anomaly banner */
-  .anomaly-banner {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--amber-light); border: 1px solid #fcd34d;
-    border-radius: 10px; padding: 12px 16px; margin-bottom: 16px;
-    font-size: 12px;
-  }
-  .anomaly-banner svg { width: 16px; height: 16px; flex-shrink: 0; color: var(--amber); fill: var(--amber); }
-  .anomaly-banner strong { color: var(--text-primary); }
+/* Misc */
+.sdivider{height:1px;background:var(--border);margin:14px 0;}
+.section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tm);margin-bottom:10px;}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+.footer-credit{text-align:center;padding:16px;font-size:10px;color:var(--tm);border-top:1px solid var(--border);background:var(--surface);}
+.footer-credit strong{color:var(--ts);}
 
-  /* Empty / loading states */
-  .empty-state {
-    display: flex; flex-direction: column; align-items: center;
-    justify-content: center; padding: 60px 20px; gap: 12px;
-    color: var(--text-muted); text-align: center;
-  }
-  .empty-state svg { width: 40px; height: 40px; opacity: 0.3; }
-  .empty-state p { font-size: 13px; max-width: 260px; line-height: 1.5; }
-
-  /* Weekly report section */
-  .weekly-list { display: flex; flex-direction: column; gap: 8px; }
-  .week-row {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--surface-alt); border-radius: 8px; padding: 12px 14px;
-    font-size: 12px;
-  }
-  .week-row .week-label { font-weight: 600; color: var(--text-primary); }
-  .week-stats { display: flex; gap: 20px; }
-  .week-stat { text-align: right; }
-  .week-stat-val { font-weight: 600; color: var(--text-primary); }
-  .week-stat-lbl { font-size: 10px; color: var(--text-muted); }
-
-  /* Footer */
-  .footer-credit {
-    text-align: center; padding: 20px; font-size: 11px;
-    color: var(--text-muted); border-top: 1px solid var(--border);
-    background: var(--surface);
-  }
-  .footer-credit strong { color: var(--text-secondary); }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
-
-  /* Responsive */
-  @media (max-width: 1100px) {
-    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
-    .charts-grid { grid-template-columns: 1fr; }
-    .prop-overview { grid-template-columns: repeat(3, 1fr); }
-  }
-  @media (max-width: 768px) {
-    .sidebar { display: none; }
-    .content { padding: 16px; }
-    .tables-grid { grid-template-columns: 1fr; }
-  }
+@media(max-width:1200px){.kpi-grid{grid-template-columns:repeat(3,1fr);}.chart-grid-2{grid-template-columns:1fr;}}
+@media(max-width:900px){.tgrid{grid-template-columns:1fr;}.cwv-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:768px){.sidebar{display:none;}.content{padding:14px;}.prop-switcher{display:none;}}
 </style>
 </head>
 <body>
 
-<!-- ══════════════════════════════════════
-     AUTH SCREEN
-══════════════════════════════════════ -->
+<!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-card">
-    <div class="auth-logo">
-      <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+    <div class="auth-logo"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+    <h1>GSC Intelligence Dashboard v2</h1>
+    <p>Weekly + Monthly SEO monitoring with Core Web Vitals and Google Sheets export. Connect your Google account to begin.</p>
+    <div class="auth-tags">
+      <span class="auth-tag">impacteers.com</span><span class="auth-tag">xooper.ai</span>
+      <span class="auth-tag">recruitment</span><span class="auth-tag">futurejobs</span><span class="auth-tag">examprep</span>
     </div>
-    <h1>GSC Intelligence Dashboard</h1>
-    <p>Weekly SEO monitoring for all Impacteers properties. Connect your Google account to load live Search Console data.</p>
-
-    <div class="auth-properties">
-      <span class="auth-prop-tag">impacteers.com</span>
-      <span class="auth-prop-tag">xooper.ai</span>
-      <span class="auth-prop-tag">recruitment.impacteers.com</span>
-      <span class="auth-prop-tag">futurejobs.impacteers.com</span>
-      <span class="auth-prop-tag">examprep.impacteers.com</span>
-    </div>
-
-    <div class="setup-steps">
-      <p>One-time setup required</p>
+    <div class="setup-box">
+      <div class="lbl">One-time setup</div>
       <ol>
-        <li>Go to <strong>Google Cloud Console</strong> → APIs & Services → Credentials</li>
-        <li>Create an <strong>OAuth 2.0 Client ID</strong> (Web application type)</li>
+        <li>Google Cloud Console → Create <strong>OAuth 2.0 Client ID</strong> (Web app type)</li>
+        <li>Enable <strong>Google Search Console API</strong> + <strong>Google Sheets API</strong></li>
         <li>Add your GitHub Pages URL to <strong>Authorised JavaScript origins</strong></li>
-        <li>Enable <strong>Google Search Console API</strong> in your project</li>
-        <li>Paste your Client ID below and sign in</li>
+        <li>Get a free <strong>PageSpeed Insights API key</strong> (no OAuth needed)</li>
+        <li>Paste IDs below and sign in</li>
       </ol>
     </div>
-
-    <input type="text" id="client-id-input" placeholder="Paste your OAuth Client ID (ends with .apps.googleusercontent.com)" />
-    <button class="btn-signin" id="btn-signin" onclick="initOAuth()">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13 12H3"/></svg>
+    <input class="inp" id="inp-clientid" placeholder="OAuth Client ID (…apps.googleusercontent.com)" />
+    <div class="inp-row">
+      <input class="inp" id="inp-psi" placeholder="PageSpeed Insights API Key" style="margin-bottom:0"/>
+      <input class="inp" id="inp-sheetid" placeholder="Google Sheet ID (optional)" style="margin-bottom:0"/>
+    </div>
+    <div style="height:8px"></div>
+    <button class="btn-signin" onclick="initOAuth()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13 12H3"/></svg>
       Sign in with Google
     </button>
-    <p class="auth-note">Your data stays in your browser. No data is sent to any third-party server. Requires GSC Owner or Full User access on each property.</p>
+    <p class="auth-note">Data stays in your browser. No third-party servers. Requires GSC Owner or Full User access on each property.</p>
   </div>
 </div>
 
-<!-- ══════════════════════════════════════
-     MAIN APP
-══════════════════════════════════════ -->
+<!-- APP -->
 <div id="app">
-  <!-- Header -->
   <header class="header">
-    <div class="header-left">
-      <div class="header-logo">
-        <svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-      </div>
-      <div>
-        <div class="header-title">GSC Intelligence Dashboard</div>
-        <div class="header-subtitle">Impacteers — SEO Monitoring</div>
-      </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="hlogo"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
+      <div><div class="htitle">GSC Intelligence</div><div class="hsub">Impacteers · v2</div></div>
     </div>
-    <div class="header-right">
-      <div class="header-user">
-        <div class="user-avatar" id="user-avatar">G</div>
-        <span id="user-name">Girish Kumar</span>
-      </div>
-      <button class="btn-signout" onclick="signOut()">Sign Out</button>
+    <div style="display:flex;align-items:center;gap:8px;overflow-x:auto;padding:4px 0;" id="prop-switcher-bar"></div>
+    <div class="hright">
+      <div class="uavatar" id="uavatar">G</div>
+      <button class="btn-so" onclick="signOut()">Sign Out</button>
     </div>
   </header>
 
   <div class="main">
-    <!-- Sidebar -->
     <nav class="sidebar">
-      <div class="sidebar-label">Views</div>
-      <button class="nav-item active" onclick="setView('overview', this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-        Overview
+      <div class="slbl">Weekly</div>
+      <button class="nav-item active" onclick="setView('overview',this)" data-view="overview">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>Overview
       </button>
-      <button class="nav-item" onclick="setView('trends', this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-        Trends
+      <button class="nav-item" onclick="setView('queries',this)" data-view="queries">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Queries
       </button>
-      <button class="nav-item" onclick="setView('keywords', this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        Keywords
+      <button class="nav-item" onclick="setView('pages',this)" data-view="pages">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Pages
       </button>
-      <button class="nav-item" onclick="setView('pages', this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-        Top Pages
+      <button class="nav-item" onclick="setView('segments',this)" data-view="segments">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>Segments
       </button>
-      <button class="nav-item" onclick="setView('weekly', this)">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-        Weekly Report
+      <button class="nav-item" onclick="setView('opportunity',this)" data-view="opportunity">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Opportunities
       </button>
-      <div class="sidebar-divider"></div>
-      <div class="sidebar-label">Properties</div>
-      <div class="prop-section" id="prop-nav"></div>
+      <div class="sdiv"></div>
+      <div class="slbl">Monthly</div>
+      <button class="nav-item" onclick="setView('health',this)" data-view="health">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Health Summary
+      </button>
+      <button class="nav-item" onclick="setView('cwv',this)" data-view="cwv">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Core Web Vitals
+      </button>
+      <button class="nav-item" onclick="setView('alerts',this)" data-view="alerts" id="nav-alerts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>Audit Signals
+      </button>
+      <div class="sdiv"></div>
+      <div class="slbl">Export</div>
+      <button class="nav-item" onclick="openSheetsModal()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Sheets Export
+      </button>
     </nav>
 
-    <!-- Content -->
     <main class="content" id="content-area">
-      <div class="empty-state">
+      <div class="empty">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        <p>Click <strong>Fetch Data</strong> to load your Search Console metrics for all properties.</p>
+        <p>Select a property and click <strong>Fetch Data</strong> to begin.</p>
       </div>
     </main>
   </div>
 
   <footer class="footer-credit">
-    <strong>Girish Kumar G | Programmatic SEO Manager</strong> &nbsp;·&nbsp; Father of SEO &nbsp;·&nbsp; Impacteers GSC Dashboard
+    <strong>Girish Kumar G | Programmatic SEO Manager</strong> &nbsp;·&nbsp; Father of SEO &nbsp;·&nbsp; Impacteers GSC Dashboard v2
   </footer>
 </div>
 
+<!-- Sheets Modal -->
+<div class="modal-bg" id="sheets-modal">
+  <div class="modal">
+    <h3>Export to Google Sheets</h3>
+    <p>This will append current data to your configured Google Sheet. Make sure you have set the Sheet ID in the setup screen and the sheet is shared with your Google account.</p>
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:600;margin-bottom:8px;color:var(--ts)">What will be exported:</div>
+      <div style="display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--ts)">
+        <div>✓ Weekly_[Property] — clicks, impressions, CTR, position, top query/page</div>
+        <div>✓ Monthly_Summary — 28d metrics + MoM deltas</div>
+        <div>✓ Alerts_Log — all auto-flagged anomalies</div>
+        <div>✓ Opportunity_Tracker — position 4–10 queries</div>
+        <div>✓ CWV_Log — PageSpeed data per property</div>
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="mbtn mbtn-cancel" onclick="closeSheetsModal()">Cancel</button>
+      <button class="mbtn mbtn-confirm" onclick="exportToSheets()">Export Now</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ══════════════════════════════════════
+// ═══════════════════════════════════
 // CONFIG
-// ══════════════════════════════════════
-const PROPERTIES = [
-  { id: 'impacteers',    url: 'sc-domain:impacteers.com',               label: 'impacteers.com',               color: '#4f46e5' },
-  { id: 'xooper',        url: 'sc-domain:xooper.ai',                    label: 'xooper.ai',                    color: '#10b981' },
-  { id: 'recruitment',   url: 'https://recruitment.impacteers.com/',    label: 'recruitment.impacteers.com',   color: '#3b82f6' },
-  { id: 'futurejobs',    url: 'https://futurejobs.impacteers.com/',     label: 'futurejobs.impacteers.com',    color: '#f59e0b' },
-  { id: 'examprep',      url: 'https://examprep.impacteers.com/',       label: 'examprep.impacteers.com',      color: '#ef4444' },
+// ═══════════════════════════════════
+const PROPS = [
+  {id:'impacteers',  sc:'sc-domain:impacteers.com',              label:'impacteers.com',             color:'#4f46e5', short:'IMP'},
+  {id:'xooper',      sc:'sc-domain:xooper.ai',                   label:'xooper.ai',                  color:'#10b981', short:'XOP'},
+  {id:'recruitment', sc:'sc-domain:recruitment.impacteers.com',  label:'recruitment.impacteers.com', color:'#3b82f6', short:'REC'},
+  {id:'futurejobs',  sc:'sc-domain:futurejobs.impacteers.com',   label:'futurejobs.impacteers.com',  color:'#f59e0b', short:'FJ'},
+  {id:'examprep',    sc:'sc-domain:examprep.impacteers.com',     label:'examprep.impacteers.com',    color:'#ef4444', short:'EXP'},
 ];
+const GSC  = 'https://searchconsole.googleapis.com/webmasters/v3';
+const GSHEETS = 'https://sheets.googleapis.com/v4/spreadsheets';
 
-const GSC_API = 'https://searchconsole.googleapis.com/webmasters/v3';
-let tokenClient = null;
-let accessToken  = null;
-let activeView   = 'overview';
-let activeProp   = null; // null = all
-let dateRange    = 28;
-let gscData      = {}; // { propId: { rows, totals, weeklyRows } }
-let charts       = {};
+let token       = null;
+let psiKey      = '';
+let sheetId     = '';
+let activeProp  = 'impacteers';
+let activeView  = 'overview';
+let dateRange   = 7;
+let data        = {}; // keyed by propId
+let charts      = {};
+let alerts      = [];
 
-// ══════════════════════════════════════
-// OAuth
-// ══════════════════════════════════════
+// ═══════════════════════════════════
+// AUTH
+// ═══════════════════════════════════
 function initOAuth() {
-  const clientId = document.getElementById('client-id-input').value.trim();
-  if (!clientId) { alert('Please paste your OAuth Client ID first.'); return; }
-
-  const scopes = 'https://www.googleapis.com/auth/webmasters.readonly';
-  const redirectUri = location.origin + location.pathname;
+  const cid = document.getElementById('inp-clientid').value.trim();
+  if (!cid) { alert('Paste your OAuth Client ID first.'); return; }
+  psiKey  = document.getElementById('inp-psi').value.trim();
+  sheetId = document.getElementById('inp-sheetid').value.trim();
+  sessionStorage.setItem('cid', cid);
+  sessionStorage.setItem('psi', psiKey);
+  sessionStorage.setItem('sid', sheetId);
   const state = Math.random().toString(36).slice(2);
-  sessionStorage.setItem('oauth_state', state);
-  sessionStorage.setItem('oauth_client_id', clientId);
-
-  const params = new URLSearchParams({
-    client_id: clientId,
-    redirect_uri: redirectUri,
-    response_type: 'token',
-    scope: scopes,
-    state,
-    include_granted_scopes: 'true',
+  sessionStorage.setItem('os', state);
+  const p = new URLSearchParams({
+    client_id: cid, redirect_uri: location.origin + location.pathname,
+    response_type:'token',
+    scope:'https://www.googleapis.com/auth/webmasters.readonly https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/userinfo.profile',
+    state, include_granted_scopes:'true'
   });
-
-  location.href = `https://accounts.google.com/o/oauth2/v2/auth?${params}`;
+  location.href = `https://accounts.google.com/o/oauth2/v2/auth?${p}`;
 }
 
-function handleOAuthCallback() {
-  const hash = new URLSearchParams(location.hash.slice(1));
-  const token = hash.get('access_token');
-  if (!token) return false;
-
-  const state = hash.get('state');
-  if (state !== sessionStorage.getItem('oauth_state')) return false;
-
-  accessToken = token;
-  history.replaceState(null, '', location.pathname);
+function handleCallback() {
+  const h = new URLSearchParams(location.hash.slice(1));
+  const t = h.get('access_token');
+  if (!t) return false;
+  if (h.get('state') !== sessionStorage.getItem('os')) return false;
+  token   = t;
+  psiKey  = sessionStorage.getItem('psi') || '';
+  sheetId = sessionStorage.getItem('sid') || '';
+  history.replaceState(null,'',location.pathname);
   return true;
 }
 
-function signOut() {
-  accessToken = null;
-  gscData = {};
-  sessionStorage.removeItem('oauth_state');
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('auth-screen').style.display = 'flex';
-  destroyCharts();
+async function loadUserInfo() {
+  try {
+    const r = await fetch('https://www.googleapis.com/oauth2/v2/userinfo',{headers:{Authorization:`Bearer ${token}`}});
+    const u = await r.json();
+    const av = document.getElementById('uavatar');
+    if (u.picture) av.innerHTML = `<img src="${u.picture}" />`;
+    else av.textContent = (u.name||'G')[0].toUpperCase();
+  } catch(e) {}
 }
 
-// ══════════════════════════════════════
+function signOut() {
+  token = null; data = {}; alerts = [];
+  destroyCharts();
+  document.getElementById('app').style.display='none';
+  document.getElementById('auth-screen').style.display='flex';
+}
+
+// ═══════════════════════════════════
 // STARTUP
-// ══════════════════════════════════════
+// ═══════════════════════════════════
 window.addEventListener('load', () => {
-  const loggedIn = handleOAuthCallback();
-  if (loggedIn) {
-    showApp();
-  }
+  if (handleCallback()) { showApp(); }
 });
 
 function showApp() {
-  document.getElementById('auth-screen').style.display = 'none';
-  document.getElementById('app').style.display = 'block';
-  buildPropNav();
+  document.getElementById('auth-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  buildPropSwitcher();
+  loadUserInfo();
   renderContent();
 }
 
-function buildPropNav() {
-  const nav = document.getElementById('prop-nav');
-  nav.innerHTML = '';
-  PROPERTIES.forEach(p => {
+function buildPropSwitcher() {
+  const bar = document.getElementById('prop-switcher-bar');
+  bar.innerHTML = '';
+  PROPS.forEach(p => {
     const btn = document.createElement('button');
-    btn.className = 'prop-item';
-    btn.dataset.propId = p.id;
-    btn.innerHTML = `<span class="prop-dot" style="background:${p.color}"></span><span class="prop-name">${p.label}</span>`;
+    btn.className = `prop-btn ${p.id===activeProp?'active':''}`;
+    btn.dataset.pid = p.id;
+    btn.textContent = p.short;
+    btn.title = p.label;
     btn.onclick = () => {
-      document.querySelectorAll('.prop-item').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
       activeProp = p.id;
+      document.querySelectorAll('.prop-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      destroyCharts();
       renderContent();
     };
-    nav.appendChild(btn);
+    bar.appendChild(btn);
   });
 }
 
-// ══════════════════════════════════════
+// ═══════════════════════════════════
 // VIEW ROUTER
-// ══════════════════════════════════════
-function setView(view, el) {
-  activeView = view;
-  document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+// ═══════════════════════════════════
+function setView(v, el) {
+  activeView = v;
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
+  destroyCharts();
   renderContent();
 }
 
 function renderContent() {
-  const hasData = Object.keys(gscData).length > 0;
+  const d = data[activeProp];
+  const views = { overview:renderOverview, queries:renderQueries, pages:renderPages, segments:renderSegments, opportunity:renderOpportunity, health:renderHealth, cwv:renderCWV, alerts:renderAlerts };
+  (views[activeView]||renderOverview)(d);
+}
+
+// ═══════════════════════════════════
+// FETCH ALL DATA
+// ═══════════════════════════════════
+async function fetchAll() {
   const area = document.getElementById('content-area');
-
-  if (!hasData) {
-    area.innerHTML = `
-      <div class="controls-bar">
-        <div><div class="page-title">Overview</div><div class="page-subtitle">All properties — last ${dateRange} days</div></div>
-        <div class="controls-right">
-          ${rangeBtnsHTML()}
-          ${fetchBtnHTML()}
-        </div>
-      </div>
-      <div class="empty-state">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-        <p>Click <strong>Fetch Data</strong> to load Search Console metrics for all properties.</p>
-      </div>`;
-    attachControls();
-    return;
-  }
-
-  const views = { overview: renderOverview, trends: renderTrends, keywords: renderKeywords, pages: renderPages, weekly: renderWeekly };
-  (views[activeView] || renderOverview)();
-}
-
-function rangeBtnsHTML() {
-  return `<div class="date-range-btns">
-    <button class="range-btn ${dateRange===7?'active':''}" onclick="setRange(7,this)">7D</button>
-    <button class="range-btn ${dateRange===28?'active':''}" onclick="setRange(28,this)">28D</button>
-    <button class="range-btn ${dateRange===90?'active':''}" onclick="setRange(90,this)">90D</button>
-  </div>`;
-}
-
-function fetchBtnHTML(loading=false) {
-  return loading
-    ? `<button class="btn-fetch" disabled><span class="spinner"></span> Fetching…</button>`
-    : `<button class="btn-fetch" id="fetch-btn" onclick="fetchAllData()">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-        Fetch Data
-      </button>`;
-}
-
-function attachControls() {
-  // range buttons re-bind after render; fetch btn is inline onclick
-}
-
-function setRange(r, el) {
-  dateRange = r;
-  document.querySelectorAll('.range-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-  gscData = {};
-  destroyCharts();
-  fetchAllData();
-}
-
-// ══════════════════════════════════════
-// DATA FETCH
-// ══════════════════════════════════════
-async function fetchAllData() {
-  const area = document.getElementById('content-area');
-  const title = { overview:'Overview', trends:'Trends', keywords:'Keywords', pages:'Top Pages', weekly:'Weekly Report' }[activeView] || 'Overview';
-  area.innerHTML = `
-    <div class="controls-bar">
-      <div><div class="page-title">${title}</div></div>
-      <div class="controls-right">${rangeBtnsHTML()}${fetchBtnHTML(true)}</div>
-    </div>
-    <div class="empty-state"><div class="spinner" style="width:32px;height:32px;border-color:#e4e7f0;border-top-color:var(--accent)"></div><p>Fetching data from Search Console…</p></div>`;
-
-  const endDate = new Date(); endDate.setDate(endDate.getDate() - 2); // GSC has ~2 day lag
-  const startDate = new Date(); startDate.setDate(endDate.getDate() - dateRange + 1);
-  const fmt = d => d.toISOString().split('T')[0];
-  const sd = fmt(startDate), ed = fmt(endDate);
-
-  // Previous period for delta
-  const prevEnd = new Date(startDate); prevEnd.setDate(prevEnd.getDate() - 1);
-  const prevStart = new Date(prevEnd); prevStart.setDate(prevEnd.getDate() - dateRange + 1);
-  const psd = fmt(prevStart), ped = fmt(prevEnd);
-
-  gscData = {};
-
-  await Promise.all(PROPERTIES.map(async prop => {
-    try {
-      const [cur, prev, weekly, queries, pages] = await Promise.all([
-        gscQuery(prop.url, sd, ed, ['date']),
-        gscQuery(prop.url, psd, ped, ['date']),
-        gscQuery(prop.url, sd, ed, ['date']),
-        gscQuery(prop.url, sd, ed, ['query'], 15),
-        gscQuery(prop.url, sd, ed, ['page'], 10),
-      ]);
-      gscData[prop.id] = {
-        prop,
-        rows: cur.rows || [],
-        prevRows: prev.rows || [],
-        weeklyRows: buildWeekly(cur.rows || []),
-        queries: queries.rows || [],
-        pages: pages.rows || [],
-        totals: sumRows(cur.rows || []),
-        prevTotals: sumRows(prev.rows || []),
-      };
-    } catch(e) {
-      console.warn(`Failed ${prop.label}:`, e);
-      gscData[prop.id] = { prop, rows:[], prevRows:[], weeklyRows:[], queries:[], pages:[], totals:{clicks:0,impressions:0,ctr:0,position:0}, prevTotals:{clicks:0,impressions:0,ctr:0,position:0}, error: true };
-    }
-  }));
-
+  area.innerHTML = `<div class="empty"><div class="spinner" style="width:28px;height:28px;border-color:#e4e7f0;border-top-color:var(--accent)"></div><p>Fetching GSC data for all 5 properties…</p></div>`;
+  const prop = PROPS.find(p=>p.id===activeProp);
+  const ed = new Date(); ed.setDate(ed.getDate()-2);
+  const sd = new Date(); sd.setDate(ed.getDate()-dateRange+1);
+  const prev_ed = new Date(sd); prev_ed.setDate(prev_ed.getDate()-1);
+  const prev_sd = new Date(prev_ed); prev_sd.setDate(prev_ed.getDate()-dateRange+1);
+  const fmt = d=>d.toISOString().split('T')[0];
+  alerts = [];
+  data = {};
+  await Promise.all(PROPS.map(p=>fetchProp(p, fmt(sd), fmt(ed), fmt(prev_sd), fmt(prev_ed))));
+  genAlerts();
+  document.getElementById('nav-alerts').innerHTML = `
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+    Audit Signals${alerts.length?`<span class="nav-badge">${alerts.length}</span>`:''}`;
   destroyCharts();
   renderContent();
 }
 
-async function gscQuery(siteUrl, startDate, endDate, dimensions, rowLimit=500) {
-  const body = { startDate, endDate, dimensions, rowLimit, dataState:'final' };
-  const r = await fetch(`${GSC_API}/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+async function fetchProp(p, sd, ed, psd, ped) {
+  try {
+    const [cur, prev, qRows, pRows, devRows, cntRows] = await Promise.all([
+      gscQ(p.sc, sd, ed, ['date']),
+      gscQ(p.sc, psd, ped, ['date']),
+      gscQ(p.sc, sd, ed, ['query'], 20),
+      gscQ(p.sc, sd, ed, ['page'], 15),
+      gscQ(p.sc, sd, ed, ['device']),
+      gscQ(p.sc, sd, ed, ['country'], 10),
+    ]);
+    data[p.id] = {
+      prop:p, rows:cur.rows||[], prevRows:prev.rows||[],
+      queries:qRows.rows||[], pages:pRows.rows||[],
+      devices:devRows.rows||[], countries:cntRows.rows||[],
+      totals:sum(cur.rows||[]), prevTotals:sum(prev.rows||[]),
+    };
+  } catch(e) {
+    data[p.id] = { prop:p, rows:[], prevRows:[], queries:[], pages:[], devices:[], countries:[], totals:z(), prevTotals:z(), err:true };
+  }
+}
+
+async function gscQ(site, sd, ed, dims, limit=500) {
+  const r = await fetch(`${GSC}/sites/${encodeURIComponent(site)}/searchAnalytics/query`,{
+    method:'POST',
+    headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+    body:JSON.stringify({startDate:sd,endDate:ed,dimensions:dims,rowLimit:limit,dataState:'final'})
   });
-  if (!r.ok) throw new Error(await r.text());
+  if(!r.ok) throw new Error(await r.text());
   return r.json();
 }
 
-function sumRows(rows) {
-  if (!rows.length) return { clicks:0, impressions:0, ctr:0, position:0 };
-  const t = rows.reduce((a, r) => ({ clicks: a.clicks+r.clicks, impressions: a.impressions+r.impressions, ctr: a.ctr+r.ctr, position: a.position+r.position }), {clicks:0,impressions:0,ctr:0,position:0});
-  t.ctr = t.ctr / rows.length;
-  t.position = t.position / rows.length;
-  return t;
+async function fetchPSI(url) {
+  if (!psiKey) return null;
+  try {
+    const r = await fetch(`https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=mobile&key=${psiKey}&category=performance`);
+    const d = await r.json();
+    const lhR = d.lighthouseResult?.audits;
+    const crux = d.loadingExperience?.metrics;
+    return {
+      lcp_mobile: crux?.LARGEST_CONTENTFUL_PAINT_MS?.percentile/1000 || null,
+      cls: crux?.CUMULATIVE_LAYOUT_SHIFT_SCORE?.percentile/100 || null,
+      inp: crux?.INTERACTION_TO_NEXT_PAINT?.percentile || null,
+      ttfb: crux?.EXPERIMENTAL_TIME_TO_FIRST_BYTE?.percentile || null,
+      fcp: crux?.FIRST_CONTENTFUL_PAINT_MS?.percentile/1000 || null,
+      score: d.lighthouseResult?.categories?.performance?.score*100 || null,
+    };
+  } catch(e) { return null; }
 }
 
-function buildWeekly(rows) {
-  // Group by ISO week
-  const weeks = {};
-  rows.forEach(r => {
-    const d = new Date(r.keys[0]);
-    const weekKey = getISOWeek(d);
-    if (!weeks[weekKey]) weeks[weekKey] = { label: weekKey, clicks:0, impressions:0, ctr:[], position:[] };
-    weeks[weekKey].clicks += r.clicks;
-    weeks[weekKey].impressions += r.impressions;
-    weeks[weekKey].ctr.push(r.ctr);
-    weeks[weekKey].position.push(r.position);
+// ═══════════════════════════════════
+// AUTO-FLAG ALERTS
+// ═══════════════════════════════════
+function genAlerts() {
+  PROPS.forEach(p => {
+    const d = data[p.id]; if(!d||d.err) return;
+    // High imp, low CTR
+    d.queries.forEach(r => {
+      if (r.impressions>500 && r.ctr<0.02) {
+        alerts.push({type:'warn',prop:p.label,metric:'High Imp / Low CTR',val:`${fmtN(r.impressions)} impr · ${(r.ctr*100).toFixed(2)}% CTR`,fix:`Rewrite title + meta for query: "${r.keys[0]}"`,url:''});
+      }
+    });
+    // Position drop
+    // (would need historical comparison — flag pages with pos > 20)
+    d.pages.forEach(r => {
+      if (r.position > 20 && r.impressions > 200) {
+        alerts.push({type:'warn',prop:p.label,metric:'Low Position Page',val:`Pos ${r.position.toFixed(1)} · ${fmtN(r.impressions)} impr`,fix:`Content audit: ${r.keys[0].replace(/https?:\/\/[^/]+/,'')}`,url:r.keys[0]});
+      }
+    });
+    // Mobile CTR gap
+    const mob = d.devices.find(r=>r.keys[0]==='MOBILE');
+    const desk = d.devices.find(r=>r.keys[0]==='DESKTOP');
+    if (mob && desk && desk.ctr > 0 && (desk.ctr - mob.ctr)/desk.ctr > 0.2) {
+      alerts.push({type:'crit',prop:p.label,metric:'Mobile CTR Gap >20%',val:`Mobile ${(mob.ctr*100).toFixed(2)}% vs Desktop ${(desk.ctr*100).toFixed(2)}%`,fix:`Check mobile title truncation + schema rendering on mobile for ${p.label}`,url:''});
+    }
+    // Overall CTR very low
+    if (d.totals.impressions > 1000 && d.totals.ctr < 0.01) {
+      alerts.push({type:'crit',prop:p.label,metric:'Site-wide CTR Critical',val:`${(d.totals.ctr*100).toFixed(2)}% avg CTR across ${fmtN(d.totals.impressions)} impressions`,fix:`Audit all title tags + meta descriptions across ${p.label}`,url:''});
+    }
   });
-  return Object.values(weeks).map(w => ({
-    ...w,
-    ctr: w.ctr.reduce((a,b)=>a+b,0)/w.ctr.length,
-    position: w.position.reduce((a,b)=>a+b,0)/w.position.length,
-  })).slice(-13);
 }
 
-function getISOWeek(d) {
-  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-  date.setUTCDate(date.getUTCDate() + 4 - (date.getUTCDay() || 7));
-  const y = date.getUTCFullYear();
-  const w = Math.ceil((((date - new Date(Date.UTC(y,0,1)))/86400000) + 1) / 7);
-  return `W${String(w).padStart(2,'0')} ${y}`;
-}
-
-// ══════════════════════════════════════
+// ═══════════════════════════════════
 // RENDER: OVERVIEW
-// ══════════════════════════════════════
-function renderOverview() {
-  // Aggregate across all or single prop
-  const propsToShow = activeProp ? [gscData[activeProp]].filter(Boolean) : Object.values(gscData);
-  const allTotals = mergeTotals(propsToShow.map(d=>d.totals));
-  const allPrev   = mergeTotals(propsToShow.map(d=>d.prevTotals));
-
+// ═══════════════════════════════════
+function renderOverview(d) {
   const area = document.getElementById('content-area');
+  if (!d) { area.innerHTML = emptyHTML('No data yet. Click Fetch Data.'); injectFetchBtn(area); return; }
+  const t = d.totals, pt = d.prevTotals;
   area.innerHTML = `
-    <div class="controls-bar">
-      <div>
-        <div class="page-title">${activeProp ? gscData[activeProp].prop.label : 'All Properties'}</div>
-        <div class="page-subtitle">Last ${dateRange} days · GSC data</div>
-      </div>
-      <div class="controls-right">${rangeBtnsHTML()}${fetchBtnHTML()}</div>
-    </div>
-    ${anomalyBanner(propsToShow)}
-    <!-- Property strips -->
-    <div class="prop-overview" id="prop-overview-strip"></div>
-    <!-- KPIs -->
+    ${cBar('Overview','Clicks · Impressions · CTR · Position · Indexed',true)}
     <div class="kpi-grid">
-      ${kpiCard('Total Clicks', allTotals.clicks, allPrev.clicks, 'clicks', '#4f46e5', clicksIcon())}
-      ${kpiCard('Impressions', allTotals.impressions, allPrev.impressions, 'impressions', '#3b82f6', impIcon())}
-      ${kpiCard('Avg CTR', (allTotals.ctr*100).toFixed(2)+'%', (allPrev.ctr*100).toFixed(2)+'%', 'ctr', '#10b981', ctrIcon(), true)}
-      ${kpiCard('Avg Position', allTotals.position.toFixed(1), allPrev.position.toFixed(1), 'position', '#f59e0b', posIcon(), false, true)}
+      ${kpi('Clicks',t.clicks,pt.clicks,'#4f46e5',clickI())}
+      ${kpi('Impressions',t.impressions,pt.impressions,'#3b82f6',impI())}
+      ${kpi('Avg CTR',(t.ctr*100).toFixed(2)+'%',(pt.ctr*100).toFixed(2)+'%','#10b981',ctrI(),true)}
+      ${kpi('Avg Position',t.position.toFixed(1),pt.position.toFixed(1),'#f59e0b',posI(),false,true)}
+      ${kpi('Total Queries',d.queries.length,'—','#8b5cf6',qI())}
     </div>
-    <!-- Charts -->
-    <div class="charts-grid">
-      <div class="chart-card">
-        <div class="chart-header">
-          <div><div class="chart-title">Clicks & Impressions</div><div class="chart-subtitle">Daily trend</div></div>
-          <div class="chart-legend">
-            <div class="legend-item"><div class="legend-dot" style="background:#4f46e5"></div>Clicks</div>
-            <div class="legend-item"><div class="legend-dot" style="background:#e0e7ff"></div>Impressions</div>
-          </div>
-        </div>
-        <div class="chart-container"><canvas id="chart-trend"></canvas></div>
+    <div class="chart-grid-2">
+      <div class="ccard">
+        <div class="cheader"><div><div class="ctitle">Clicks & Impressions — Daily</div><div class="csub">Last ${dateRange} days</div></div></div>
+        <div class="ch-lg"><canvas id="c-trend"></canvas></div>
       </div>
-      <div class="chart-card">
-        <div class="chart-header"><div><div class="chart-title">Property Split</div><div class="chart-subtitle">Clicks distribution</div></div></div>
-        <div class="chart-container-sm"><canvas id="chart-donut"></canvas></div>
+      <div class="ccard">
+        <div class="cheader"><div><div class="ctitle">CTR Trend</div><div class="csub">Daily CTR %</div></div></div>
+        <div class="ch"><canvas id="c-ctr"></canvas></div>
+      </div>
+    </div>
+    <div class="tgrid">
+      <div class="tcard">
+        <div class="thead-row"><div><div class="tc-title">Top Queries by Clicks</div><div class="tc-sub">Top 10 traffic drivers</div></div></div>
+        <table><thead><tr><th>#</th><th>Query</th><th>Clicks</th><th>Position</th></tr></thead>
+        <tbody>${d.queries.sort((a,b)=>b.clicks-a.clicks).slice(0,10).map((r,i)=>`<tr>
+          <td style="color:var(--tm);font-size:10px">${i+1}</td>
+          <td class="td-p">${r.keys[0]}</td>
+          <td><strong>${fmtN(r.clicks)}</strong></td>
+          <td>${posBadge(r.position)}</td></tr>`).join('')}</tbody></table>
+      </div>
+      <div class="tcard">
+        <div class="thead-row"><div><div class="tc-title">Top Pages by Clicks</div><div class="tc-sub">Best performers</div></div></div>
+        <table><thead><tr><th>#</th><th>URL</th><th>Clicks</th><th>CTR</th></tr></thead>
+        <tbody>${d.pages.sort((a,b)=>b.clicks-a.clicks).slice(0,10).map((r,i)=>`<tr>
+          <td style="color:var(--tm);font-size:10px">${i+1}</td>
+          <td class="td-url td-p" title="${r.keys[0]}">${r.keys[0].replace(/https?:\/\/[^/]+/,'')||'/'}</td>
+          <td><strong>${fmtN(r.clicks)}</strong></td>
+          <td>${(r.ctr*100).toFixed(1)}%</td></tr>`).join('')}</tbody></table>
       </div>
     </div>`;
-
-  // Property overview strip
-  const strip = document.getElementById('prop-overview-strip');
-  PROPERTIES.forEach(p => {
-    const d = gscData[p.id];
-    const card = document.createElement('div');
-    card.className = `prop-card ${activeProp===p.id?'active-prop':''}`;
-    card.innerHTML = `
-      <div class="prop-card-dot" style="background:${p.color}"></div>
-      <div class="prop-card-name">${p.label}</div>
-      <div class="prop-card-val">${d?.error ? '—' : fmtNum(d?.totals?.clicks||0)}</div>
-      <div class="prop-card-label">clicks</div>`;
-    card.onclick = () => {
-      activeProp = activeProp === p.id ? null : p.id;
-      document.querySelectorAll('.prop-item').forEach(b => b.classList.remove('active'));
-      if (activeProp) document.querySelector(`[data-prop-id="${activeProp}"]`)?.classList.add('active');
-      destroyCharts(); renderOverview();
-    };
-    strip.appendChild(card);
-  });
 
   // Trend chart
-  const trendData = mergeRows(propsToShow);
-  const labels = trendData.map(r => {
-    const d = new Date(r.date);
-    return `${d.getDate()} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()]}`;
-  });
+  const sorted = [...d.rows].sort((a,b)=>a.keys[0].localeCompare(b.keys[0]));
+  const labels = sorted.map(r=>fmtDate(r.keys[0]));
+  const ctx1 = document.getElementById('c-trend').getContext('2d');
+  charts['trend'] = new Chart(ctx1,{type:'bar',data:{labels,datasets:[
+    {label:'Clicks',data:sorted.map(r=>r.clicks),backgroundColor:'rgba(79,70,229,.85)',borderRadius:3,order:1},
+    {label:'Impressions',data:sorted.map(r=>r.impressions),type:'line',borderColor:'#c7d2fe',backgroundColor:'rgba(199,210,254,.1)',borderWidth:2,pointRadius:0,tension:.4,fill:true,order:0,yAxisID:'y1'}
+  ]},options:copts(true)});
 
-  const ctx1 = document.getElementById('chart-trend').getContext('2d');
-  charts['trend'] = new Chart(ctx1, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        { label:'Clicks', data: trendData.map(r=>r.clicks), backgroundColor:'rgba(79,70,229,0.85)', borderRadius:3, order:1 },
-        { label:'Impressions', data: trendData.map(r=>r.impressions), type:'line', borderColor:'#e0e7ff', backgroundColor:'rgba(224,231,255,0.15)', borderWidth:2, pointRadius:0, tension:0.4, fill:true, order:0, yAxisID:'y1' },
-      ]
-    },
-    options: chartOpts(true)
-  });
-
-  // Donut
-  const ctx2 = document.getElementById('chart-donut').getContext('2d');
-  charts['donut'] = new Chart(ctx2, {
-    type: 'doughnut',
-    data: {
-      labels: PROPERTIES.map(p=>p.label),
-      datasets: [{ data: PROPERTIES.map(p=>gscData[p.id]?.totals?.clicks||0), backgroundColor: PROPERTIES.map(p=>p.color), borderWidth:2, borderColor:'#fff', hoverOffset:6 }]
-    },
-    options: { responsive:true, maintainAspectRatio:false, cutout:'68%', plugins:{ legend:{ position:'bottom', labels:{ font:{family:'Poppins',size:10}, padding:10, boxWidth:10 } }, tooltip:{ callbacks:{ label: ctx => ` ${fmtNum(ctx.parsed)} clicks` } } } }
-  });
+  const ctx2 = document.getElementById('c-ctr').getContext('2d');
+  charts['ctr'] = new Chart(ctx2,{type:'line',data:{labels,datasets:[{label:'CTR %',data:sorted.map(r=>(r.ctr*100).toFixed(2)),borderColor:'#10b981',backgroundColor:'rgba(16,185,129,.08)',borderWidth:2,tension:.4,pointRadius:2,fill:true}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.parsed.y}%`}}},scales:{x:{grid:{display:false},ticks:{font:{family:'Poppins',size:9},maxTicksLimit:8}},y:{grid:{color:'#f0f2f9'},ticks:{font:{family:'Poppins',size:9},callback:v=>`${v}%`}}}}});
 }
 
-// ══════════════════════════════════════
-// RENDER: TRENDS
-// ══════════════════════════════════════
-function renderTrends() {
+// ═══════════════════════════════════
+// RENDER: QUERIES
+// ═══════════════════════════════════
+function renderQueries(d) {
   const area = document.getElementById('content-area');
+  if (!d) { area.innerHTML = emptyHTML(); injectFetchBtn(area); return; }
+  const byImp   = [...d.queries].sort((a,b)=>b.impressions-a.impressions).slice(0,10);
+  const hiImpLC = d.queries.filter(r=>r.impressions>200&&r.ctr<0.03).sort((a,b)=>b.impressions-a.impressions).slice(0,10);
+  const newQ    = d.queries.filter(r=>r.clicks>0).slice(0,5); // proxy for new queries
+
   area.innerHTML = `
-    <div class="controls-bar">
-      <div><div class="page-title">Trends</div><div class="page-subtitle">CTR & Position over time</div></div>
-      <div class="controls-right">${rangeBtnsHTML()}${fetchBtnHTML()}</div>
+    ${cBar('Queries','Search terms analysis',true)}
+    <div class="tgrid">
+      <div class="tcard">
+        <div class="thead-row"><div><div class="tc-title">Top by Impressions</div><div class="tc-sub">Untapped potential</div></div></div>
+        <table><thead><tr><th>#</th><th>Query</th><th>Impr</th><th>CTR</th><th>Pos</th></tr></thead>
+        <tbody>${byImp.map((r,i)=>`<tr>
+          <td style="color:var(--tm);font-size:10px">${i+1}</td><td class="td-p">${r.keys[0]}</td>
+          <td>${fmtN(r.impressions)}</td><td>${(r.ctr*100).toFixed(2)}%</td><td>${posBadge(r.position)}</td></tr>`).join('')}</tbody></table>
+      </div>
+      <div class="tcard">
+        <div class="thead-row"><div><div class="tc-title">High Imp / Low CTR</div><div class="tc-sub">⚡ Meta fix signals</div></div></div>
+        <table><thead><tr><th>Query</th><th>Impr</th><th>CTR</th><th>Pos</th></tr></thead>
+        <tbody>${hiImpLC.length ? hiImpLC.map(r=>`<tr>
+          <td class="td-p">${r.keys[0]}</td><td>${fmtN(r.impressions)}</td>
+          <td style="color:var(--red);font-weight:600">${(r.ctr*100).toFixed(2)}%</td><td>${posBadge(r.position)}</td></tr>`).join('') :
+          '<tr><td colspan="4" style="text-align:center;color:var(--tm);padding:20px">No signals this period</td></tr>'}</tbody></table>
+      </div>
     </div>
-    <div style="display:grid;gap:16px;">
-      <div class="chart-card">
-        <div class="chart-header"><div><div class="chart-title">Click-Through Rate</div><div class="chart-subtitle">Daily avg across all properties</div></div></div>
-        <div class="chart-container"><canvas id="chart-ctr"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-header"><div><div class="chart-title">Average Position</div><div class="chart-subtitle">Lower = better</div></div></div>
-        <div class="chart-container"><canvas id="chart-pos"></canvas></div>
-      </div>
+    <div class="ccard">
+      <div class="cheader"><div><div class="ctitle">Impressions vs CTR — Top 15 Queries</div><div class="csub">Bubble size = impressions</div></div></div>
+      <div class="ch-lg"><canvas id="c-scatter"></canvas></div>
     </div>`;
 
-  const propsToShow = activeProp ? [gscData[activeProp]].filter(Boolean) : Object.values(gscData);
-  const merged = mergeRows(propsToShow);
-  const labels = merged.map(r=>{const d=new Date(r.date);return `${d.getDate()}/${d.getMonth()+1}`;});
-
-  const ctrCtx = document.getElementById('chart-ctr').getContext('2d');
-  charts['ctr'] = new Chart(ctrCtx, {
-    type:'line',
-    data:{
-      labels,
-      datasets:[{ label:'CTR %', data:merged.map(r=>(r.ctr*100).toFixed(2)), borderColor:'#10b981', backgroundColor:'rgba(16,185,129,0.08)', borderWidth:2, tension:0.4, pointRadius:2, fill:true }]
-    },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y}%`}}}, scales:{x:{grid:{display:false},ticks:{font:{family:'Poppins',size:10},maxTicksLimit:14}},y:{grid:{color:'#f0f2f9'},ticks:{font:{family:'Poppins',size:10},callback:v=>`${v}%`}}} }
-  });
-
-  const posCtx = document.getElementById('chart-pos').getContext('2d');
-  charts['pos'] = new Chart(posCtx, {
-    type:'line',
-    data:{
-      labels,
-      datasets:[{ label:'Avg Position', data:merged.map(r=>r.position.toFixed(1)), borderColor:'#f59e0b', backgroundColor:'rgba(245,158,11,0.08)', borderWidth:2, tension:0.4, pointRadius:2, fill:true }]
-    },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{grid:{display:false},ticks:{font:{family:'Poppins',size:10},maxTicksLimit:14}},y:{reverse:true,grid:{color:'#f0f2f9'},ticks:{font:{family:'Poppins',size:10}}}} }
-  });
+  const scatterData = d.queries.slice(0,15).map(r=>({x:r.position,y:r.ctr*100,r:Math.max(4,Math.sqrt(r.impressions/10))}));
+  const ctx = document.getElementById('c-scatter').getContext('2d');
+  charts['scatter'] = new Chart(ctx,{type:'bubble',data:{datasets:[{label:'Queries',data:scatterData,backgroundColor:'rgba(79,70,229,.6)',borderColor:'rgba(79,70,229,.9)',borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`Pos:${c.parsed.x.toFixed(1)} CTR:${c.parsed.y.toFixed(2)}%`}}},scales:{x:{title:{display:true,text:'Avg Position',font:{family:'Poppins',size:10}},grid:{color:'#f0f2f9'},ticks:{font:{family:'Poppins',size:9}}},y:{title:{display:true,text:'CTR %',font:{family:'Poppins',size:10}},grid:{color:'#f0f2f9'},ticks:{font:{family:'Poppins',size:9},callback:v=>`${v}%`}}}}});
 }
 
-// ══════════════════════════════════════
-// RENDER: KEYWORDS
-// ══════════════════════════════════════
-function renderKeywords() {
-  const propsToShow = activeProp ? [gscData[activeProp]].filter(Boolean) : Object.values(gscData);
-  const allQueries = {};
-  propsToShow.forEach(d => {
-    (d.queries||[]).forEach(r => {
-      const q = r.keys[0];
-      if (!allQueries[q]) allQueries[q] = { query:q, clicks:0, impressions:0, ctr:[], position:[] };
-      allQueries[q].clicks += r.clicks;
-      allQueries[q].impressions += r.impressions;
-      allQueries[q].ctr.push(r.ctr);
-      allQueries[q].position.push(r.position);
-    });
-  });
-  const sorted = Object.values(allQueries)
-    .map(q=>({...q, ctr:q.ctr.reduce((a,b)=>a+b,0)/q.ctr.length, position:q.position.reduce((a,b)=>a+b,0)/q.position.length}))
-    .sort((a,b)=>b.clicks-a.clicks).slice(0,20);
-
-  const area = document.getElementById('content-area');
-  area.innerHTML = `
-    <div class="controls-bar">
-      <div><div class="page-title">Keywords</div><div class="page-subtitle">Top 20 queries · last ${dateRange} days</div></div>
-      <div class="controls-right">${rangeBtnsHTML()}${fetchBtnHTML()}</div>
-    </div>
-    <div class="table-card">
-      <table>
-        <thead><tr>
-          <th>#</th><th>Query</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Position</th>
-        </tr></thead>
-        <tbody>
-          ${sorted.map((r,i)=>`<tr>
-            <td style="color:var(--text-muted);font-size:11px">${i+1}</td>
-            <td class="td-primary">${r.query}</td>
-            <td><strong>${fmtNum(r.clicks)}</strong></td>
-            <td>${fmtNum(r.impressions)}</td>
-            <td>${(r.ctr*100).toFixed(2)}%</td>
-            <td>${posBadge(r.position)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
-    </div>`;
-}
-
-// ══════════════════════════════════════
+// ═══════════════════════════════════
 // RENDER: PAGES
-// ══════════════════════════════════════
-function renderPages() {
-  const propsToShow = activeProp ? [gscData[activeProp]].filter(Boolean) : Object.values(gscData);
-  const allPages = {};
-  propsToShow.forEach(d => {
-    (d.pages||[]).forEach(r => {
-      const url = r.keys[0];
-      if (!allPages[url]) allPages[url] = { url, clicks:0, impressions:0, ctr:[], position:[] };
-      allPages[url].clicks += r.clicks;
-      allPages[url].impressions += r.impressions;
-      allPages[url].ctr.push(r.ctr);
-      allPages[url].position.push(r.position);
-    });
-  });
-  const sorted = Object.values(allPages)
-    .map(p=>({...p, ctr:p.ctr.reduce((a,b)=>a+b,0)/p.ctr.length, position:p.position.reduce((a,b)=>a+b,0)/p.position.length}))
-    .sort((a,b)=>b.clicks-a.clicks);
-
+// ═══════════════════════════════════
+function renderPages(d) {
   const area = document.getElementById('content-area');
+  if (!d) { area.innerHTML = emptyHTML(); injectFetchBtn(area); return; }
+  const top     = [...d.pages].sort((a,b)=>b.clicks-a.clicks).slice(0,10);
+  const noClick = d.pages.filter(r=>r.clicks===0&&r.impressions>=100).sort((a,b)=>b.impressions-a.impressions).slice(0,10);
+
   area.innerHTML = `
-    <div class="controls-bar">
-      <div><div class="page-title">Top Pages</div><div class="page-subtitle">By clicks · last ${dateRange} days</div></div>
-      <div class="controls-right">${rangeBtnsHTML()}${fetchBtnHTML()}</div>
+    ${cBar('Pages','URL performance analysis',true)}
+    <div class="tcard">
+      <div class="thead-row"><div><div class="tc-title">Top Pages by Clicks</div></div></div>
+      <table><thead><tr><th>#</th><th>URL</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Position</th></tr></thead>
+      <tbody>${top.map((r,i)=>`<tr>
+        <td style="color:var(--tm);font-size:10px">${i+1}</td>
+        <td class="td-url td-p" title="${r.keys[0]}">${r.keys[0].replace(/https?:\/\/[^/]+/,'')||'/'}</td>
+        <td><strong>${fmtN(r.clicks)}</strong></td><td>${fmtN(r.impressions)}</td>
+        <td>${(r.ctr*100).toFixed(2)}%</td><td>${posBadge(r.position)}</td></tr>`).join('')}</tbody></table>
     </div>
-    <div class="table-card">
-      <table>
-        <thead><tr>
-          <th>#</th><th>URL</th><th>Clicks</th><th>Impressions</th><th>CTR</th><th>Position</th>
-        </tr></thead>
-        <tbody>
-          ${sorted.map((r,i)=>`<tr>
-            <td style="color:var(--text-muted);font-size:11px">${i+1}</td>
-            <td class="td-url td-primary" title="${r.url}">${r.url.replace(/https?:\/\/[^/]+/,'')}</td>
-            <td><strong>${fmtNum(r.clicks)}</strong></td>
-            <td>${fmtNum(r.impressions)}</td>
-            <td>${(r.ctr*100).toFixed(2)}%</td>
-            <td>${posBadge(r.position)}</td>
-          </tr>`).join('')}
-        </tbody>
-      </table>
+    <div class="tcard">
+      <div class="thead-row"><div><div class="tc-title">0 Clicks / Impressions &gt;100</div><div class="tc-sub">⚡ Title/meta issue signal</div></div></div>
+      <table><thead><tr><th>URL</th><th>Impressions</th><th>Avg Position</th><th>Signal</th></tr></thead>
+      <tbody>${noClick.length ? noClick.map(r=>`<tr>
+        <td class="td-url td-p" title="${r.keys[0]}">${r.keys[0].replace(/https?:\/\/[^/]+/,'')||'/'}</td>
+        <td>${fmtN(r.impressions)}</td><td>${posBadge(r.position)}</td>
+        <td><span class="tag" style="background:var(--rl);color:var(--red)">Rewrite meta</span></td></tr>`).join('') :
+        '<tr><td colspan="4" style="text-align:center;color:var(--tm);padding:20px">No issues detected</td></tr>'}</tbody></table>
     </div>`;
 }
 
-// ══════════════════════════════════════
-// RENDER: WEEKLY REPORT
-// ══════════════════════════════════════
-function renderWeekly() {
-  const propsToShow = activeProp ? [gscData[activeProp]].filter(Boolean) : Object.values(gscData);
+// ═══════════════════════════════════
+// RENDER: SEGMENTS
+// ═══════════════════════════════════
+function renderSegments(d) {
   const area = document.getElementById('content-area');
-
-  // Aggregate weekly across props
-  const weekMap = {};
-  propsToShow.forEach(d => {
-    (d.weeklyRows||[]).forEach(w => {
-      if (!weekMap[w.label]) weekMap[w.label] = { label:w.label, clicks:0, impressions:0, count:0 };
-      weekMap[w.label].clicks += w.clicks;
-      weekMap[w.label].impressions += w.impressions;
-      weekMap[w.label].count++;
-    });
-  });
-  const weeks = Object.values(weekMap).slice(-8).reverse();
+  if (!d) { area.innerHTML = emptyHTML(); injectFetchBtn(area); return; }
+  const mob  = d.devices.find(r=>r.keys[0]==='MOBILE')||{clicks:0,impressions:0,ctr:0};
+  const desk = d.devices.find(r=>r.keys[0]==='DESKTOP')||{clicks:0,impressions:0,ctr:0};
+  const tab  = d.devices.find(r=>r.keys[0]==='TABLET')||{clicks:0,impressions:0,ctr:0};
+  const totalClicks = mob.clicks+desk.clicks+tab.clicks||1;
+  const mPct = Math.round(mob.clicks/totalClicks*100);
+  const dPct = Math.round(desk.clicks/totalClicks*100);
+  const gap = desk.ctr>0 ? ((desk.ctr-mob.ctr)/desk.ctr*100) : 0;
+  const gapFlag = gap > 20;
+  const topCountry = [...d.countries].sort((a,b)=>b.clicks-a.clicks);
+  const totalCC = topCountry.reduce((s,r)=>s+r.clicks,0)||1;
 
   area.innerHTML = `
-    <div class="controls-bar">
-      <div><div class="page-title">Weekly Report</div><div class="page-subtitle">GSC weekly digest · Q2 tracking</div></div>
-      <div class="controls-right">${rangeBtnsHTML()}${fetchBtnHTML()}</div>
+    ${cBar('Segments','Device · Country · Search Type',true)}
+    <div class="seg-grid">
+      <div class="ccard">
+        <div class="cheader"><div><div class="ctitle">Device Split</div><div class="csub">Clicks distribution</div></div></div>
+        <div class="kpi-grid" style="grid-template-columns:1fr 1fr 1fr;margin-bottom:12px">
+          ${miniKpi('Mobile','#4f46e5',fmtN(mob.clicks),`${(mob.ctr*100).toFixed(2)}% CTR`)}
+          ${miniKpi('Desktop','#10b981',fmtN(desk.clicks),`${(desk.ctr*100).toFixed(2)}% CTR`)}
+          ${miniKpi('Tablet','#f59e0b',fmtN(tab.clicks),`${(tab.ctr*100).toFixed(2)}% CTR`)}
+        </div>
+        ${gapFlag ? `<div style="background:var(--rl);color:var(--red);border-radius:7px;padding:8px 12px;font-size:11px;font-weight:600;margin-bottom:10px">⚠ Mobile CTR gap: ${gap.toFixed(0)}% below desktop — check mobile title truncation</div>` : ''}
+        <div class="seg-bar">
+          <div class="seg-item"><span class="seg-label">Mobile</span><div class="seg-track"><div class="seg-fill" style="width:${mPct}%;background:#4f46e5"></div></div><span class="seg-pct">${mPct}%</span></div>
+          <div class="seg-item"><span class="seg-label">Desktop</span><div class="seg-track"><div class="seg-fill" style="width:${dPct}%;background:#10b981"></div></div><span class="seg-pct">${dPct}%</span></div>
+          <div class="seg-item"><span class="seg-label">Tablet</span><div class="seg-track"><div class="seg-fill" style="width:${100-mPct-dPct}%;background:#f59e0b"></div></div><span class="seg-pct">${100-mPct-dPct}%</span></div>
+        </div>
+      </div>
+      <div class="ccard">
+        <div class="cheader"><div><div class="ctitle">Country Breakdown</div><div class="csub">India% audience match</div></div></div>
+        <div style="height:180px"><canvas id="c-country"></canvas></div>
+      </div>
     </div>
-    <div class="chart-card" style="margin-bottom:16px">
-      <div class="chart-header"><div><div class="chart-title">Weekly Clicks</div><div class="chart-subtitle">Week-by-week performance</div></div></div>
-      <div class="chart-container"><canvas id="chart-weekly"></canvas></div>
+    <div class="ccard">
+      <div class="cheader"><div><div class="ctitle">Device CTR Comparison</div><div class="csub">CTR by device type</div></div></div>
+      <div class="ch"><canvas id="c-device"></canvas></div>
+    </div>`;
+
+  // Country donut
+  const topC = topCountry.slice(0,6);
+  const ctx1 = document.getElementById('c-country').getContext('2d');
+  charts['country'] = new Chart(ctx1,{type:'doughnut',data:{
+    labels:topC.map(r=>r.keys[0].toUpperCase()),
+    datasets:[{data:topC.map(r=>r.clicks),backgroundColor:['#4f46e5','#10b981','#3b82f6','#f59e0b','#ef4444','#8b5cf6'],borderWidth:2,borderColor:'#fff',hoverOffset:4}]
+  },options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{font:{family:'Poppins',size:9},padding:6,boxWidth:8}},tooltip:{callbacks:{label:c=>` ${fmtN(c.parsed)} clicks`}}}}});
+
+  // Device bar
+  const ctx2 = document.getElementById('c-device').getContext('2d');
+  charts['device'] = new Chart(ctx2,{type:'bar',data:{
+    labels:['Clicks','Impressions','CTR (×100)'],
+    datasets:[
+      {label:'Mobile',data:[mob.clicks,mob.impressions,mob.ctr*100],backgroundColor:'rgba(79,70,229,.8)',borderRadius:4},
+      {label:'Desktop',data:[desk.clicks,desk.impressions,desk.ctr*100],backgroundColor:'rgba(16,185,129,.8)',borderRadius:4},
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{family:'Poppins',size:10}}}},scales:{x:{grid:{display:false},ticks:{font:{family:'Poppins',size:10}}},y:{grid:{color:'#f0f2f9'},ticks:{font:{family:'Poppins',size:10}}}}}});
+}
+
+// ═══════════════════════════════════
+// RENDER: OPPORTUNITY (pos 4-10)
+// ═══════════════════════════════════
+function renderOpportunity(d) {
+  const area = document.getElementById('content-area');
+  if (!d) { area.innerHTML = emptyHTML(); injectFetchBtn(area); return; }
+  const qwin = d.queries.filter(r=>r.position>=4&&r.position<=10).sort((a,b)=>b.impressions-a.impressions);
+  const p11_20 = d.queries.filter(r=>r.position>10&&r.position<=20).sort((a,b)=>b.impressions-a.impressions).slice(0,10);
+
+  area.innerHTML = `
+    ${cBar('Opportunity Tracker','Position 4–10 quick wins',true)}
+    <div style="background:var(--al);border:1px solid var(--accent);border-radius:9px;padding:10px 14px;margin-bottom:14px;font-size:11px;color:var(--accent)">
+      <strong>${qwin.length} queries</strong> in the 4–10 position zone. These are your highest-leverage targets — one content refresh can push them to page 1 top-3.
     </div>
-    <div class="table-card">
-      <div class="table-header"><div class="chart-title">Weekly Breakdown</div></div>
-      <div class="weekly-list">
-        ${weeks.map((w,i)=>`
-          <div class="week-row">
-            <span class="week-label">${w.label}</span>
-            <div class="week-stats">
-              <div class="week-stat"><div class="week-stat-val">${fmtNum(w.clicks)}</div><div class="week-stat-lbl">Clicks</div></div>
-              <div class="week-stat"><div class="week-stat-val">${fmtNum(w.impressions)}</div><div class="week-stat-lbl">Impressions</div></div>
-              ${i>0 && weeks[i-1] ? `<div class="week-stat"><div class="week-stat-val" style="color:${w.clicks>=weeks[i-1].clicks?'var(--green)':'var(--red)'}">${w.clicks>=weeks[i-1].clicks?'↑':'↓'} ${Math.abs(Math.round((w.clicks-weeks[i-1].clicks)/(weeks[i-1].clicks||1)*100))}%</div><div class="week-stat-lbl">vs prev</div></div>` : ''}
-            </div>
-          </div>`).join('')}
+    <div class="tcard">
+      <div class="thead-row"><div><div class="tc-title">Quick Win Zone — Position 4–10</div><div class="tc-sub">Sort by impressions. Prioritise: high impr + low CTR = fix meta. High impr + good CTR = push with internal links.</div></div></div>
+      <table><thead><tr><th>Query</th><th>Position</th><th>Impressions</th><th>CTR</th><th>Clicks</th><th>Priority</th></tr></thead>
+      <tbody>${qwin.slice(0,20).map(r=>{
+        const pri = r.impressions>500&&r.ctr<0.05 ? 'high' : r.impressions>200 ? 'mid' : 'low';
+        return `<tr>
+          <td class="td-p">${r.keys[0]}</td><td>${posBadge(r.position)}</td>
+          <td><strong>${fmtN(r.impressions)}</strong></td><td>${(r.ctr*100).toFixed(2)}%</td>
+          <td>${fmtN(r.clicks)}</td>
+          <td><span class="pbadge priority-${pri}">${pri.toUpperCase()}</span></td></tr>`;
+      }).join('')}</tbody></table>
+    </div>
+    <div class="tcard">
+      <div class="thead-row"><div><div class="tc-title">Next Page Queries — Position 11–20</div><div class="tc-sub">Build links + content depth to cross page 1</div></div></div>
+      <table><thead><tr><th>Query</th><th>Position</th><th>Impressions</th><th>CTR</th></tr></thead>
+      <tbody>${p11_20.map(r=>`<tr>
+        <td class="td-p">${r.keys[0]}</td><td>${posBadge(r.position)}</td>
+        <td>${fmtN(r.impressions)}</td><td>${(r.ctr*100).toFixed(2)}%</td></tr>`).join('')}</tbody></table>
+    </div>`;
+}
+
+// ═══════════════════════════════════
+// RENDER: HEALTH SUMMARY (MONTHLY)
+// ═══════════════════════════════════
+function renderHealth(d) {
+  const area = document.getElementById('content-area');
+  if (!d) { area.innerHTML = emptyHTML(); injectFetchBtn(area); return; }
+  const t = d.totals, pt = d.prevTotals;
+  const allTotals = PROPS.map(p=>data[p.id]?.totals||z());
+
+  area.innerHTML = `
+    ${cBar('Monthly Health Summary','28-day performance across all properties',false)}
+    <div class="section-label">All Properties — 28D Overview</div>
+    <div class="kpi-grid" style="grid-template-columns:repeat(5,1fr);margin-bottom:20px">
+      ${PROPS.map(p=>{
+        const pd = data[p.id];
+        return `<div class="kpi" style="border-top:3px solid ${p.color}">
+          <div class="kpi-lbl" style="color:${p.color}">${p.short}</div>
+          <div class="kpi-val">${pd?.err?'—':fmtN(pd?.totals?.clicks||0)}</div>
+          <div class="kpi-delta neu" style="font-size:9px">${pd?.err?'No access':p.label.split('.')[0]}</div>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="section-label">Current Property: ${d.prop.label}</div>
+    <div class="kpi-grid">
+      ${kpi('Clicks 28D',t.clicks,pt.clicks,'#4f46e5',clickI())}
+      ${kpi('Impressions 28D',t.impressions,pt.impressions,'#3b82f6',impI())}
+      ${kpi('Avg CTR',(t.ctr*100).toFixed(2)+'%',(pt.ctr*100).toFixed(2)+'%','#10b981',ctrI(),true)}
+      ${kpi('Avg Position',t.position.toFixed(1),pt.position.toFixed(1),'#f59e0b',posI(),false,true)}
+      ${kpi('Total Queries',d.queries.length,'—','#8b5cf6',qI())}
+    </div>
+    <div class="chart-grid-1">
+      <div class="ccard">
+        <div class="cheader"><div><div class="ctitle">Clicks Trend — All Properties</div><div class="csub">Comparison view</div></div></div>
+        <div class="ch-lg"><canvas id="c-allprop"></canvas></div>
+      </div>
+    </div>
+    <div class="tgrid">
+      <div class="tcard">
+        <div class="thead-row"><div><div class="tc-title">Top Queries (28D)</div></div></div>
+        <table><thead><tr><th>Query</th><th>Clicks</th><th>Position</th></tr></thead>
+        <tbody>${d.queries.sort((a,b)=>b.clicks-a.clicks).slice(0,10).map(r=>`<tr>
+          <td class="td-p">${r.keys[0]}</td><td><strong>${fmtN(r.clicks)}</strong></td><td>${posBadge(r.position)}</td></tr>`).join('')}</tbody></table>
+      </div>
+      <div class="tcard">
+        <div class="thead-row"><div><div class="tc-title">Top Pages (28D)</div></div></div>
+        <table><thead><tr><th>URL</th><th>Clicks</th><th>CTR</th></tr></thead>
+        <tbody>${d.pages.sort((a,b)=>b.clicks-a.clicks).slice(0,10).map(r=>`<tr>
+          <td class="td-url td-p" title="${r.keys[0]}">${r.keys[0].replace(/https?:\/\/[^/]+/,'')||'/'}</td>
+          <td><strong>${fmtN(r.clicks)}</strong></td><td>${(r.ctr*100).toFixed(2)}%</td></tr>`).join('')}</tbody></table>
       </div>
     </div>`;
 
-  const ctx = document.getElementById('chart-weekly').getContext('2d');
-  const wReverse = [...weeks].reverse();
-  charts['weekly'] = new Chart(ctx, {
-    type:'bar',
-    data:{
-      labels: wReverse.map(w=>w.label),
-      datasets:[
-        { label:'Clicks', data:wReverse.map(w=>w.clicks), backgroundColor:'rgba(79,70,229,0.85)', borderRadius:4 },
-        { label:'Impressions', data:wReverse.map(w=>w.impressions), type:'line', borderColor:'#93c5fd', borderWidth:2, pointRadius:2, tension:0.4, yAxisID:'y1' },
-      ]
-    },
-    options: chartOpts(true)
+  // All properties comparison
+  const labels = PROPS.map(p=>p.short);
+  const ctx = document.getElementById('c-allprop').getContext('2d');
+  charts['allprop'] = new Chart(ctx,{type:'bar',data:{
+    labels,
+    datasets:[
+      {label:'Clicks',data:PROPS.map(p=>data[p.id]?.totals?.clicks||0),backgroundColor:PROPS.map(p=>p.color),borderRadius:5},
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${fmtN(c.parsed.y)} clicks`}}},scales:{x:{grid:{display:false},ticks:{font:{family:'Poppins',size:11}}},y:{grid:{color:'#f0f2f9'},ticks:{font:{family:'Poppins',size:10},callback:v=>fmtN(v)}}}}});
+}
+
+// ═══════════════════════════════════
+// RENDER: CORE WEB VITALS
+// ═══════════════════════════════════
+function renderCWV(d) {
+  const area = document.getElementById('content-area');
+  if (!d) { area.innerHTML = emptyHTML(); injectFetchBtn(area); return; }
+  const prop = d.prop;
+  const topUrls = d.pages.slice(0,5).map(r=>r.keys[0]);
+
+  area.innerHTML = `
+    ${cBar('Core Web Vitals','PageSpeed Insights — Real CrUX field data',false)}
+    ${!psiKey ? `<div style="background:var(--ambl);border:1px solid #fde68a;border-radius:9px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--amber)">
+      ⚠ No PSI API Key configured. Add your key in the setup screen to load CWV data. Get a free key at <strong>console.cloud.google.com</strong> → Credentials → API Key → Enable PageSpeed Insights API.
+    </div>` : ''}
+    <div class="section-label">Thresholds: LCP &lt;2.5s ✓ | CLS &lt;0.1 ✓ | INP &lt;200ms ✓ | TTFB &lt;800ms ✓</div>
+    <div id="cwv-results"><div style="display:flex;align-items:center;gap:8px;color:var(--tm);font-size:12px;padding:20px 0">
+      ${psiKey ? `<div class="spinner" style="width:16px;height:16px;border-color:#e4e7f0;border-top-color:var(--accent)"></div> Loading PageSpeed data for top 5 pages…` : 'Configure PSI API key to load data.'}
+    </div></div>
+    <div class="tcard" style="margin-top:16px">
+      <div class="thead-row"><div><div class="tc-title">Pages Checked</div><div class="tc-sub">Top 5 by clicks</div></div></div>
+      <table><thead><tr><th>URL</th><th>LCP (mobile)</th><th>CLS</th><th>INP</th><th>TTFB</th><th>Score</th></tr></thead>
+      <tbody id="cwv-table-body"><tr><td colspan="6" style="text-align:center;color:var(--tm);padding:16px">Loading…</td></tr></tbody>
+    </div>`;
+
+  if (psiKey) loadCWV(topUrls);
+}
+
+async function loadCWV(urls) {
+  const results = await Promise.all(urls.map(url=>fetchPSI(url).then(r=>({url,r}))));
+  const tbody = document.getElementById('cwv-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = results.map(({url,r})=>{
+    if (!r) return `<tr><td class="td-url" title="${url}">${url.replace(/https?:\/\/[^/]+/,'')||'/'}</td><td colspan="5" style="color:var(--tm)">No CrUX data</td></tr>`;
+    const lcpC = r.lcp_mobile===null?'neu':r.lcp_mobile<2.5?'pg':r.lcp_mobile<4?'pm':'pr';
+    const clsC = r.cls===null?'neu':r.cls<0.1?'pg':r.cls<0.25?'pm':'pr';
+    const inpC = r.inp===null?'neu':r.inp<200?'pg':r.inp<500?'pm':'pr';
+    const ttfC = r.ttfb===null?'neu':r.ttfb<800?'pg':r.ttfb<1800?'pm':'pr';
+    return `<tr>
+      <td class="td-url td-p" title="${url}">${url.replace(/https?:\/\/[^/]+/,'')||'/'}</td>
+      <td><span class="pbadge ${lcpC}">${r.lcp_mobile!==null?r.lcp_mobile.toFixed(2)+'s':'—'}</span></td>
+      <td><span class="pbadge ${clsC}">${r.cls!==null?r.cls.toFixed(3):'—'}</span></td>
+      <td><span class="pbadge ${inpC}">${r.inp!==null?r.inp+'ms':'—'}</span></td>
+      <td><span class="pbadge ${ttfC}">${r.ttfb!==null?r.ttfb+'ms':'—'}</span></td>
+      <td><strong>${r.score!==null?Math.round(r.score):'—'}</strong></td>
+    </tr>`;
+  }).join('');
+  document.getElementById('cwv-results').innerHTML = '';
+}
+
+// ═══════════════════════════════════
+// RENDER: AUDIT SIGNALS
+// ═══════════════════════════════════
+function renderAlerts(d) {
+  const area = document.getElementById('content-area');
+  area.innerHTML = `
+    ${cBar('Audit Signals',`${alerts.length} auto-flagged issues`,false)}
+    ${!alerts.length ? '<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg><p>No signals detected. All thresholds clear.</p></div>' :
+    `<div class="alert-list">${alerts.map(a=>`
+      <div class="alert-row alert-${a.type==='crit'?'crit':'warn'}">
+        <div class="alert-icon">${a.type==='crit'?'🔴':'🟡'}</div>
+        <div class="alert-body">
+          <strong>${a.metric} — ${a.prop}</strong>
+          <span>${a.val}</span>
+          <div class="alert-fix">→ ${a.fix}</div>
+        </div>
+      </div>`).join('')}
+    </div>`}
+    <div style="margin-top:16px;padding:12px 14px;background:var(--surface-alt);border-radius:9px;font-size:11px;color:var(--ts);line-height:1.6">
+      <strong style="color:var(--tp)">How to use this:</strong> Each signal above maps to a row in your <em>Audit_Signals</em> Google Sheet tab. Export to Sheets → sort by Severity → submit to dev. At end of Q2, this log becomes your Technical SEO Priority Audit document.
+    </div>`;
+}
+
+// ═══════════════════════════════════
+// GOOGLE SHEETS EXPORT
+// ═══════════════════════════════════
+function openSheetsModal() { document.getElementById('sheets-modal').classList.add('open'); }
+function closeSheetsModal() { document.getElementById('sheets-modal').classList.remove('open'); }
+
+async function exportToSheets() {
+  closeSheetsModal();
+  if (!sheetId) { alert('No Google Sheet ID configured. Add it in the setup screen.'); return; }
+  const today = new Date().toISOString().split('T')[0];
+
+  for (const p of PROPS) {
+    const d = data[p.id]; if (!d || d.err) continue;
+    const topQ = d.queries.sort((a,b)=>b.clicks-a.clicks)[0]?.keys[0]||'';
+    const topP = d.pages.sort((a,b)=>b.clicks-a.clicks)[0]?.keys[0]||'';
+    const mob  = d.devices.find(r=>r.keys[0]==='MOBILE')||{ctr:0};
+    const desk = d.devices.find(r=>r.keys[0]==='DESKTOP')||{ctr:0};
+    // Weekly tab
+    await sheetsAppend(`Weekly_${p.short}`, [[today, fmtN(d.totals.clicks), fmtN(d.totals.impressions), (d.totals.ctr*100).toFixed(2)+'%', d.totals.position.toFixed(1), topQ, topP, (mob.ctr*100).toFixed(2)+'%', (desk.ctr*100).toFixed(2)+'%', '']]);
+    // Monthly summary
+    await sheetsAppend('Monthly_Summary', [[today, p.label, d.totals.clicks, d.totals.impressions, (d.totals.ctr*100).toFixed(2), d.totals.position.toFixed(1), '', '', '', '', '', '']]);
+  }
+  // Alerts log
+  if (alerts.length) {
+    const alertRows = alerts.map(a=>[today, a.prop, a.metric, a.val, '', '', 'Open']);
+    await sheetsAppend('Alerts_Log', alertRows);
+  }
+  // Opportunity tracker
+  PROPS.forEach(async p => {
+    const d = data[p.id]; if (!d||d.err) return;
+    const opps = d.queries.filter(r=>r.position>=4&&r.position<=10).slice(0,10).map(r=>[r.keys[0], r.position.toFixed(1), r.impressions, (r.ctr*100).toFixed(2)+'%', '', '', '']);
+    if (opps.length) await sheetsAppend('Opportunity_Tracker', opps);
+  });
+  alert('✅ Exported to Google Sheets successfully!');
+}
+
+async function sheetsAppend(tab, rows) {
+  await fetch(`${GSHEETS}/${sheetId}/values/${encodeURIComponent(tab)}:append?valueInputOption=USER_ENTERED`,{
+    method:'POST',
+    headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
+    body:JSON.stringify({values:rows})
   });
 }
 
-// ══════════════════════════════════════
+// ═══════════════════════════════════
 // HELPERS
-// ══════════════════════════════════════
-function mergeTotals(totals) {
-  const t = totals.reduce((a,b)=>({ clicks:a.clicks+b.clicks, impressions:a.impressions+b.impressions, ctr:a.ctr+b.ctr, position:a.position+b.position }), {clicks:0,impressions:0,ctr:0,position:0});
-  const n = totals.filter(t=>t.clicks>0).length || 1;
-  t.ctr /= n; t.position /= n;
+// ═══════════════════════════════════
+function sum(rows) {
+  if (!rows.length) return z();
+  const t = rows.reduce((a,r)=>({clicks:a.clicks+r.clicks,impressions:a.impressions+r.impressions,ctr:a.ctr+r.ctr,position:a.position+r.position}),z());
+  t.ctr /= rows.length; t.position /= rows.length;
   return t;
 }
+function z(){return {clicks:0,impressions:0,ctr:0,position:0};}
 
-function mergeRows(propDataArr) {
-  const dayMap = {};
-  propDataArr.forEach(d => {
-    (d.rows||[]).forEach(r => {
-      const date = r.keys[0];
-      if (!dayMap[date]) dayMap[date] = { date, clicks:0, impressions:0, ctr:[], position:[] };
-      dayMap[date].clicks += r.clicks;
-      dayMap[date].impressions += r.impressions;
-      dayMap[date].ctr.push(r.ctr);
-      dayMap[date].position.push(r.position);
-    });
-  });
-  return Object.values(dayMap)
-    .sort((a,b)=>a.date.localeCompare(b.date))
-    .map(d=>({...d, ctr:d.ctr.reduce((a,b)=>a+b,0)/d.ctr.length, position:d.position.reduce((a,b)=>a+b,0)/d.position.length}));
+function kpi(label,val,prev,color,icon,isPct=false,isPos=false){
+  const n=parseFloat(String(val).replace('%','')); const p=parseFloat(String(prev).replace('%',''));
+  const d=p?((n-p)/p*100):0; const isUp=isPos?d<0:d>0;
+  const cls=d===0?'neu':isUp?'up':'down'; const arrow=d===0?'—':isUp?'↑':'↓';
+  return `<div class="kpi"><div class="kpi-lbl" style="color:${color}">${icon} ${label}</div>
+    <div class="kpi-val">${typeof val==='number'?fmtN(val):val}</div>
+    <div class="kpi-delta ${cls}">${arrow} ${d===0?'no change':(Math.abs(d).toFixed(1)+'% vs prev')}</div></div>`;
 }
+function miniKpi(label,color,val,sub){return `<div class="kpi"><div class="kpi-lbl" style="color:${color}">${label}</div><div class="kpi-val">${val}</div><div class="kpi-delta neu" style="font-size:9px">${sub}</div></div>`;}
 
-function kpiCard(label, val, prevVal, type, color, icon, isPct=false, isPos=false) {
-  const numVal = parseFloat(String(val).replace('%',''));
-  const numPrev = parseFloat(String(prevVal).replace('%',''));
-  const delta = numPrev ? ((numVal-numPrev)/numPrev*100) : 0;
-  const isUp = isPos ? delta < 0 : delta > 0; // for position, lower is better
-  const sign = delta > 0 ? '+' : '';
-  const cls = delta === 0 ? 'neutral' : (isUp ? 'up' : 'down');
-  const arrow = delta === 0 ? '—' : (isUp ? '↑' : '↓');
-  return `<div class="kpi-card">
-    <div class="kpi-label" style="color:${color}">${icon} ${label}</div>
-    <div class="kpi-value">${typeof val === 'number' ? fmtNum(val) : val}</div>
-    <div class="kpi-change ${cls}">${arrow} ${sign}${delta.toFixed(1)}% vs prev period</div>
+function cBar(title,sub,showFetch=true){
+  return `<div class="cbar">
+    <div><div class="ptitle">${title}</div><div class="psub">${sub}</div></div>
+    <div class="cright">
+      <div class="rbtn-grp">
+        <button class="rbtn ${dateRange===7?'active':''}" onclick="setRange(7,this)">7D</button>
+        <button class="rbtn ${dateRange===28?'active':''}" onclick="setRange(28,this)">28D</button>
+        <button class="rbtn ${dateRange===90?'active':''}" onclick="setRange(90,this)">90D</button>
+      </div>
+      ${showFetch?`<button class="btn-fetch" onclick="fetchAll()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>Fetch Data</button>`:''}
+    </div>
   </div>`;
 }
 
-function anomalyBanner(propsToShow) {
-  const anomalies = [];
-  propsToShow.forEach(d => {
-    if (!d.rows?.length) return;
-    const recent = d.rows.slice(-3);
-    const avgClicks = d.totals.clicks / (d.rows.length||1);
-    const recentAvg = recent.reduce((a,r)=>a+r.clicks,0)/3;
-    if (avgClicks > 0 && recentAvg < avgClicks * 0.6) {
-      anomalies.push(`<strong>${d.prop.label}</strong> shows a recent click drop (last 3 days avg vs overall avg).`);
-    }
-  });
-  if (!anomalies.length) return '';
-  return `<div class="anomaly-banner">
-    <svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    <div>⚠ Anomaly detected: ${anomalies.join(' · ')}</div>
-  </div>`;
+function injectFetchBtn(area){
+  const e=area.querySelector('.empty'); if(!e) return;
+  const b=document.createElement('button'); b.className='btn-fetch'; b.style.marginTop='12px';
+  b.innerHTML='Fetch Data'; b.onclick=fetchAll; e.appendChild(b);
 }
 
-function posBadge(pos) {
-  const cls = pos <= 10 ? 'pos-good' : pos <= 20 ? 'pos-mid' : 'pos-low';
-  return `<span class="position-badge ${cls}">${pos.toFixed(1)}</span>`;
+function setRange(r,el){
+  dateRange=r;
+  document.querySelectorAll('.rbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  data={}; alerts=[]; destroyCharts();
+  fetchAll();
 }
 
-function fmtNum(n) {
-  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
-  if (n >= 1000) return (n/1000).toFixed(1)+'K';
-  return Math.round(n).toLocaleString();
+function posBadge(pos){
+  const c=pos<=10?'pg':pos<=20?'pm':'pr';
+  return `<span class="pbadge ${c}">${pos.toFixed(1)}</span>`;
+}
+function fmtN(n){if(n>=1e6)return(n/1e6).toFixed(1)+'M';if(n>=1000)return(n/1000).toFixed(1)+'K';return Math.round(n).toLocaleString();}
+function fmtDate(s){const d=new Date(s);return `${d.getDate()}/${d.getMonth()+1}`;}
+function emptyHTML(msg='No data yet.'){return `<div class="empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg><p>${msg}</p></div>`;}
+
+function copts(dual=false){
+  const o={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{mode:'index',intersect:false,titleFont:{family:'Poppins'},bodyFont:{family:'Poppins',size:11}}},scales:{x:{grid:{display:false},ticks:{font:{family:'Poppins',size:9},maxTicksLimit:10}},y:{grid:{color:'#f0f2f9'},ticks:{font:{family:'Poppins',size:9},callback:v=>fmtN(v)}}}};
+  if(dual) o.scales.y1={position:'right',grid:{display:false},ticks:{font:{family:'Poppins',size:9},callback:v=>fmtN(v)}};
+  return o;
 }
 
-function chartOpts(dualAxis=false) {
-  const base = {
-    responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{display:false}, tooltip:{ mode:'index', intersect:false, titleFont:{family:'Poppins'}, bodyFont:{family:'Poppins',size:12} } },
-    scales:{
-      x:{ grid:{display:false}, ticks:{ font:{family:'Poppins',size:10}, maxTicksLimit:10 } },
-      y:{ grid:{color:'#f0f2f9'}, ticks:{ font:{family:'Poppins',size:10}, callback:v=>fmtNum(v) } },
-    }
-  };
-  if (dualAxis) base.scales.y1 = { position:'right', grid:{display:false}, ticks:{ font:{family:'Poppins',size:10}, callback:v=>fmtNum(v) } };
-  return base;
-}
-
-function destroyCharts() {
-  Object.values(charts).forEach(c => { try { c.destroy(); } catch(e){} });
-  charts = {};
-}
+function destroyCharts(){Object.values(charts).forEach(c=>{try{c.destroy();}catch(e){}});charts={};}
 
 // Icons
-const clicksIcon = () => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`;
-const impIcon    = () => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
-const ctrIcon    = () => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>`;
-const posIcon    = () => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/></svg>`;
+const clickI=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>`;
+const impI=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>`;
+const ctrI=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>`;
+const posI=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="10" r="3"/><path d="M12 21.7C17.3 17 20 13 20 10a8 8 0 1 0-16 0c0 3 2.7 6.9 8 11.7z"/></svg>`;
+const qI=()=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>`;
 </script>
 </body>
 </html>
