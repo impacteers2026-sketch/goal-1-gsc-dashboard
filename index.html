@@ -182,6 +182,31 @@ tr:hover td{background:var(--surface-alt);}
 .empty svg{width:36px;height:36px;opacity:.3;}
 .empty p{font-size:12px;max-width:240px;line-height:1.5;}
 
+/* AI Panel */
+.ai-panel{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);box-shadow:var(--ss);overflow:hidden;margin-bottom:16px;}
+.ai-panel-header{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border);background:linear-gradient(135deg,#f5f3ff,#eef2ff);}
+.ai-panel-title{font-size:13px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:6px;}
+.ai-panel-title svg{width:14px;height:14px;}
+.ai-panel-body{padding:16px 18px;}
+.ai-output{font-size:12px;line-height:1.8;color:var(--tp);white-space:pre-wrap;min-height:60px;}
+.ai-output.loading{color:var(--tm);font-style:italic;}
+.ai-output h3{font-size:13px;font-weight:700;margin:12px 0 6px;color:var(--accent);}
+.ai-output strong{color:var(--tp);}
+.ai-output ul{padding-left:16px;margin:4px 0;}
+.ai-output li{margin-bottom:4px;}
+.ai-btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.ai-btn{padding:7px 14px;border-radius:7px;border:1.5px solid var(--accent);background:var(--al);color:var(--accent);font-family:'Poppins',sans-serif;font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+.ai-btn:hover{background:var(--accent);color:white;}
+.ai-btn:disabled{opacity:.5;cursor:not-allowed;}
+.ai-btn svg{width:12px;height:12px;}
+.ai-chat-box{display:flex;gap:8px;margin-top:12px;}
+.ai-chat-inp{flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:7px;font-family:'Poppins',sans-serif;font-size:12px;outline:none;color:var(--tp);transition:border .2s;}
+.ai-chat-inp:focus{border-color:var(--accent);}
+.ai-chat-inp::placeholder{color:var(--tm);}
+.ai-send{padding:8px 14px;border-radius:7px;border:none;background:var(--accent);color:white;font-family:'Poppins',sans-serif;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;}
+.ai-send:disabled{opacity:.5;cursor:not-allowed;}
+.no-key-warn{background:var(--ambl);border:1px solid #fde68a;border-radius:8px;padding:10px 14px;font-size:11px;color:var(--amber);margin-bottom:12px;}
+
 /* Misc */
 .sdivider{height:1px;background:var(--border);margin:14px 0;}
 .section-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tm);margin-bottom:10px;}
@@ -202,8 +227,8 @@ tr:hover td{background:var(--surface-alt);}
 <div id="auth-screen">
   <div class="auth-card">
     <div class="auth-logo"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-    <h1>GSC Intelligence Dashboard v2</h1>
-    <p>Weekly + Monthly SEO monitoring with Core Web Vitals and Google Sheets export. Connect your Google account to begin.</p>
+    <h1>GSC Intelligence Dashboard v3</h1>
+    <p>Weekly + Monthly SEO monitoring with Core Web Vitals, Google Sheets export, and AI-powered analysis via Claude.</p>
     <div class="auth-tags">
       <span class="auth-tag">impacteers.com</span><span class="auth-tag">xooper.ai</span>
       <span class="auth-tag">recruitment</span><span class="auth-tag">futurejobs</span><span class="auth-tag">examprep</span>
@@ -223,6 +248,7 @@ tr:hover td{background:var(--surface-alt);}
       <input class="inp" id="inp-psi" placeholder="PageSpeed Insights API Key" style="margin-bottom:0"/>
       <input class="inp" id="inp-sheetid" placeholder="Google Sheet ID (optional)" style="margin-bottom:0"/>
     </div>
+    <input class="inp" id="inp-or" placeholder="OpenRouter API Key (sk-or-…) — for AI summaries &amp; audit reports" style="margin-top:8px"/>
     <div style="height:8px"></div>
     <button class="btn-signin" onclick="initOAuth()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M13 12H3"/></svg>
@@ -237,7 +263,7 @@ tr:hover td{background:var(--surface-alt);}
   <header class="header">
     <div style="display:flex;align-items:center;gap:10px">
       <div class="hlogo"><svg viewBox="0 0 24 24"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div>
-      <div><div class="htitle">GSC Intelligence</div><div class="hsub">Impacteers · v2</div></div>
+      <div><div class="htitle">GSC Intelligence</div><div class="hsub">Impacteers · v3</div></div>
     </div>
     <div style="display:flex;align-items:center;gap:8px;overflow-x:auto;padding:4px 0;" id="prop-switcher-bar"></div>
     <div class="hright">
@@ -280,6 +306,11 @@ tr:hover td{background:var(--surface-alt);}
       <button class="nav-item" onclick="openSheetsModal()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Sheets Export
       </button>
+      <div class="sdiv"></div>
+      <div class="slbl">AI Intelligence</div>
+      <button class="nav-item" onclick="setView('ai',this)" data-view="ai">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>AI Analyst
+      </button>
     </nav>
 
     <main class="content" id="content-area">
@@ -291,7 +322,7 @@ tr:hover td{background:var(--surface-alt);}
   </div>
 
   <footer class="footer-credit">
-    <strong>Girish Kumar G | Programmatic SEO Manager</strong> &nbsp;·&nbsp; Father of SEO &nbsp;·&nbsp; Impacteers GSC Dashboard v2
+    <strong>Girish Kumar G | Programmatic SEO Manager</strong> &nbsp;·&nbsp; Father of SEO &nbsp;·&nbsp; Impacteers GSC Dashboard v3
   </footer>
 </div>
 
@@ -334,6 +365,7 @@ const GSHEETS = 'https://sheets.googleapis.com/v4/spreadsheets';
 let token       = null;
 let psiKey      = '';
 let sheetId     = '';
+let orKey       = ''; // OpenRouter API key
 let activeProp  = 'impacteers';
 let activeView  = 'overview';
 let dateRange   = 7;
@@ -349,9 +381,11 @@ function initOAuth() {
   if (!cid) { alert('Paste your OAuth Client ID first.'); return; }
   psiKey  = document.getElementById('inp-psi').value.trim();
   sheetId = document.getElementById('inp-sheetid').value.trim();
+  orKey   = document.getElementById('inp-or').value.trim();
   sessionStorage.setItem('cid', cid);
   sessionStorage.setItem('psi', psiKey);
   sessionStorage.setItem('sid', sheetId);
+  sessionStorage.setItem('or', orKey);
   const state = Math.random().toString(36).slice(2);
   sessionStorage.setItem('os', state);
   const p = new URLSearchParams({
@@ -371,6 +405,7 @@ function handleCallback() {
   token   = t;
   psiKey  = sessionStorage.getItem('psi') || '';
   sheetId = sessionStorage.getItem('sid') || '';
+  orKey   = sessionStorage.getItem('or')  || '';
   history.replaceState(null,'',location.pathname);
   return true;
 }
@@ -440,7 +475,7 @@ function setView(v, el) {
 
 function renderContent() {
   const d = data[activeProp];
-  const views = { overview:renderOverview, queries:renderQueries, pages:renderPages, segments:renderSegments, opportunity:renderOpportunity, health:renderHealth, cwv:renderCWV, alerts:renderAlerts };
+  const views = { overview:renderOverview, queries:renderQueries, pages:renderPages, segments:renderSegments, opportunity:renderOpportunity, health:renderHealth, cwv:renderCWV, alerts:renderAlerts, ai:renderAI };
   (views[activeView]||renderOverview)(d);
 }
 
@@ -956,7 +991,255 @@ async function sheetsAppend(tab, rows) {
 }
 
 // ═══════════════════════════════════
-// HELPERS
+// RENDER: AI ANALYST
+// ═══════════════════════════════════
+function renderAI(d) {
+  const area = document.getElementById('content-area');
+  const hasData = Object.keys(data).length > 0;
+  area.innerHTML = `
+    ${cBar('AI Analyst','Powered by Claude via OpenRouter',false)}
+    ${!orKey ? `<div class="no-key-warn">⚠ No OpenRouter API key configured. Add your key (sk-or-…) in the setup screen to enable AI analysis.</div>` : ''}
+    ${!hasData ? `<div class="no-key-warn" style="background:var(--bl);border-color:#bfdbfe;color:var(--blue)">ℹ Fetch GSC data first before running AI analysis.</div>` : ''}
+
+    <!-- Weekly Summary -->
+    <div class="ai-panel">
+      <div class="ai-panel-header">
+        <div class="ai-panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Weekly Summary
+        </div>
+        <span style="font-size:10px;color:var(--ts)">Plain-English digest of this week's data</span>
+      </div>
+      <div class="ai-panel-body">
+        <div class="ai-output" id="ai-weekly-out">Click the button below to generate a weekly summary for the current property.</div>
+        <div class="ai-btn-row">
+          <button class="ai-btn" onclick="runAI('weekly')" id="ai-btn-weekly">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Generate Weekly Summary
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit Report -->
+    <div class="ai-panel">
+      <div class="ai-panel-header">
+        <div class="ai-panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+          Detailed Audit Report
+        </div>
+        <span style="font-size:10px;color:var(--ts)">Issues, root causes, dev-ready fix briefs</span>
+      </div>
+      <div class="ai-panel-body">
+        <div class="ai-output" id="ai-audit-out">Click to generate a full audit report based on current signals and data.</div>
+        <div class="ai-btn-row">
+          <button class="ai-btn" onclick="runAI('audit')" id="ai-btn-audit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Generate Audit Report
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Next Plan of Action -->
+    <div class="ai-panel">
+      <div class="ai-panel-header">
+        <div class="ai-panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          Next Plan of Action
+        </div>
+        <span style="font-size:10px;color:var(--ts)">Prioritised 3-step recommendation</span>
+      </div>
+      <div class="ai-panel-body">
+        <div class="ai-output" id="ai-plan-out">Click to get a prioritised action plan based on current performance data.</div>
+        <div class="ai-btn-row">
+          <button class="ai-btn" onclick="runAI('plan')" id="ai-btn-plan">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Generate Action Plan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ask Anything -->
+    <div class="ai-panel">
+      <div class="ai-panel-header">
+        <div class="ai-panel-title">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          Ask the Analyst
+        </div>
+        <span style="font-size:10px;color:var(--ts)">Ask anything about your GSC data</span>
+      </div>
+      <div class="ai-panel-body">
+        <div class="ai-output" id="ai-ask-out">Ask a question about any page, query, or trend in your data.</div>
+        <div class="ai-chat-box">
+          <input class="ai-chat-inp" id="ai-ask-inp" placeholder="e.g. Why is impacteers.com CTR dropping? What's wrong with the jobs page? Which queries should I focus on this week?" onkeydown="if(event.key==='Enter')askAI()"/>
+          <button class="ai-send" onclick="askAI()" id="ai-send-btn">Ask</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ═══════════════════════════════════
+// OPENROUTER AI CALLS
+// ═══════════════════════════════════
+function buildDataContext(propId) {
+  const props = propId ? [data[propId]].filter(Boolean) : Object.values(data);
+  const lines = [];
+  props.forEach(d => {
+    if (!d || d.err) return;
+    const t = d.totals;
+    lines.push(`\n== ${d.prop.label} ==`);
+    lines.push(`Clicks: ${t.clicks} | Impressions: ${t.impressions} | CTR: ${(t.ctr*100).toFixed(2)}% | Avg Position: ${t.position.toFixed(1)}`);
+    const topQ = d.queries.sort((a,b)=>b.clicks-a.clicks).slice(0,5).map(r=>`"${r.keys[0]}" (${r.clicks}cl, pos ${r.position.toFixed(1)})`).join(', ');
+    lines.push(`Top queries: ${topQ}`);
+    const topP = d.pages.sort((a,b)=>b.clicks-a.clicks).slice(0,5).map(r=>`${r.keys[0].replace(/https?:\/\/[^/]+/,'')||'/'} (${r.clicks}cl)`).join(', ');
+    lines.push(`Top pages: ${topP}`);
+    const hiImpLC = d.queries.filter(r=>r.impressions>200&&r.ctr<0.03).slice(0,5).map(r=>`"${r.keys[0]}" (${r.impressions}impr, ${(r.ctr*100).toFixed(2)}%CTR)`).join(', ');
+    if (hiImpLC) lines.push(`High impression / low CTR queries: ${hiImpLC}`);
+    const qwin = d.queries.filter(r=>r.position>=4&&r.position<=10).sort((a,b)=>b.impressions-a.impressions).slice(0,5).map(r=>`"${r.keys[0]}" pos ${r.position.toFixed(1)}`).join(', ');
+    if (qwin) lines.push(`Position 4-10 quick wins: ${qwin}`);
+    const mob = d.devices.find(r=>r.keys[0]==='MOBILE');
+    const desk = d.devices.find(r=>r.keys[0]==='DESKTOP');
+    if (mob && desk) lines.push(`Mobile CTR: ${(mob.ctr*100).toFixed(2)}% | Desktop CTR: ${(desk.ctr*100).toFixed(2)}%`);
+  });
+  const alertLines = alerts.map(a=>`[${a.type.toUpperCase()}] ${a.prop} — ${a.metric}: ${a.val} → Fix: ${a.fix}`).join('\n');
+  if (alertLines) lines.push(`\n== Auto-flagged Audit Signals ==\n${alertLines}`);
+  return lines.join('\n');
+}
+
+const AI_SYSTEM = `You are a senior SEO analyst for Impacteers, a multi-brand platform in India. 
+You analyse Google Search Console data across 5 properties: impacteers.com, xooper.ai, recruitment.impacteers.com, futurejobs.impacteers.com, examprep.impacteers.com.
+You report to Girish Kumar G, Programmatic SEO Manager and founder of the VDS (Vertical Delivery System) framework.
+Be direct, specific, and implementation-ready. No fluff. Use numbers from the data. Format output with clear sections.`;
+
+const PROMPTS = {
+  weekly: ctx => `Based on this GSC data, write a weekly SEO summary report:
+
+${ctx}
+
+Structure:
+**📊 Week at a Glance** — 3-sentence headline summary
+**✅ What's Working** — top 2-3 positive signals with exact numbers
+**⚠ What Needs Attention** — top 2-3 issues or declines
+**🎯 This Week's Priority** — single most important action to take
+Keep it under 300 words. Be specific with numbers.`,
+
+  audit: ctx => `Based on this GSC data and flagged signals, write a detailed Technical SEO Audit Report:
+
+${ctx}
+
+Structure:
+**🔍 Audit Summary** — overall health score (Good/Needs Work/Critical) with 1 sentence reason
+**🚨 Critical Issues** — issues requiring immediate action, each with: Issue | Impact | Dev Fix Brief
+**⚡ Quick Wins** — issues fixable within 1 week without dev, with exact steps
+**📉 Declining Metrics** — any drops in clicks/CTR/position with root cause hypothesis
+**📋 Dev Ticket Template** — for the top critical issue, write a ready-to-paste dev ticket
+
+Be specific. Each fix brief must mention the exact URL, query, or metric.`,
+
+  plan: ctx => `Based on this GSC data, create a prioritised Next Plan of Action for the coming week:
+
+${ctx}
+
+Structure:
+**🥇 Priority 1 — [Action Name]**
+What: [specific task]
+Why: [data reason with numbers]
+How: [exact steps]
+Expected outcome: [what will improve]
+
+**🥈 Priority 2 — [Action Name]**
+[same format]
+
+**🥉 Priority 3 — [Action Name]**
+[same format]
+
+**📅 This Month's Focus**
+1-2 sentence strategic direction based on data trends.
+
+Keep it actionable. No theory. Each step must be executable by one person.`,
+};
+
+async function runAI(type) {
+  if (!orKey) { alert('Add your OpenRouter API key in the setup screen first.'); return; }
+  const outEl = document.getElementById(`ai-${type}-out`);
+  const btnEl = document.getElementById(`ai-btn-${type}`);
+  if (!outEl) return;
+  outEl.className = 'ai-output loading';
+  outEl.textContent = '⏳ Claude is analysing your data…';
+  btnEl.disabled = true;
+  const ctx = buildDataContext(activeProp);
+  const prompt = PROMPTS[type](ctx);
+  try {
+    const res = await callOR(prompt);
+    outEl.className = 'ai-output';
+    outEl.innerHTML = formatAIOutput(res);
+  } catch(e) {
+    outEl.className = 'ai-output';
+    outEl.textContent = `Error: ${e.message}`;
+  }
+  btnEl.disabled = false;
+}
+
+async function askAI() {
+  if (!orKey) { alert('Add your OpenRouter API key in the setup screen first.'); return; }
+  const inp = document.getElementById('ai-ask-inp');
+  const outEl = document.getElementById('ai-ask-out');
+  const btn = document.getElementById('ai-send-btn');
+  const q = inp.value.trim();
+  if (!q) return;
+  outEl.className = 'ai-output loading';
+  outEl.textContent = '⏳ Analysing…';
+  btn.disabled = true;
+  const ctx = buildDataContext(activeProp);
+  const prompt = `You have access to this GSC data:\n\n${ctx}\n\nUser question: ${q}\n\nAnswer directly and specifically using the data above. If the answer isn't in the data, say so clearly. Use numbers. Be concise.`;
+  try {
+    const res = await callOR(prompt);
+    outEl.className = 'ai-output';
+    outEl.innerHTML = formatAIOutput(res);
+    inp.value = '';
+  } catch(e) {
+    outEl.className = 'ai-output';
+    outEl.textContent = `Error: ${e.message}`;
+  }
+  btn.disabled = false;
+}
+
+async function callOR(userPrompt) {
+  const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${orKey}`,
+      'Content-Type': 'application/json',
+      'HTTP-Referer': location.origin,
+      'X-Title': 'Impacteers GSC Dashboard',
+    },
+    body: JSON.stringify({
+      model: 'anthropic/claude-sonnet-4-5',
+      max_tokens: 1200,
+      messages: [
+        { role: 'system', content: AI_SYSTEM },
+        { role: 'user', content: userPrompt }
+      ]
+    })
+  });
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`OpenRouter error ${res.status}: ${err}`);
+  }
+  const json = await res.json();
+  return json.choices?.[0]?.message?.content || 'No response received.';
+}
+
+function formatAIOutput(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^#{1,3} (.+)$/gm, '<h3>$1</h3>')
+    .replace(/\n/g, '<br>');
+}
+
+// ═══════════════════════════════════
 // ═══════════════════════════════════
 function sum(rows) {
   if (!rows.length) return z();
