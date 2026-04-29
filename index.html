@@ -290,6 +290,9 @@ tr:hover td{background:var(--surface-alt);}
       <button class="nav-item" onclick="setView('opportunity',this)" data-view="opportunity">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>Opportunities
       </button>
+      <button class="nav-item" onclick="setView('branded',this)" data-view="branded">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Branded / Non-Branded
+      </button>
       <div class="sdiv"></div>
       <div class="slbl">Monthly</div>
       <button class="nav-item" onclick="setView('health',this)" data-view="health">
@@ -475,7 +478,7 @@ function setView(v, el) {
 
 function renderContent() {
   const d = data[activeProp];
-  const views = { overview:renderOverview, queries:renderQueries, pages:renderPages, segments:renderSegments, opportunity:renderOpportunity, health:renderHealth, cwv:renderCWV, alerts:renderAlerts, ai:renderAI };
+  const views = { overview:renderOverview, queries:renderQueries, pages:renderPages, segments:renderSegments, opportunity:renderOpportunity, branded:renderBranded, health:renderHealth, cwv:renderCWV, alerts:renderAlerts, ai:renderAI };
   (views[activeView]||renderOverview)(d);
 }
 
@@ -952,42 +955,149 @@ function renderAlerts(d) {
 function openSheetsModal() { document.getElementById('sheets-modal').classList.add('open'); }
 function closeSheetsModal() { document.getElementById('sheets-modal').classList.remove('open'); }
 
+const SHEET_TABS = p => [
+  `Weekly_${p.short}`,
+  'Monthly_Summary',
+  'Alerts_Log',
+  'Opportunity_Tracker',
+  'CWV_Log',
+  'Branded_Keywords',
+  'NonBranded_Keywords',
+];
+
+async function getExistingSheetTitles() {
+  const r = await fetch(`${GSHEETS}/${sheetId}?fields=sheets.properties.title`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  if (!r.ok) throw new Error(`Cannot read sheet: ${r.status} ${await r.text()}`);
+  const j = await r.json();
+  return (j.sheets || []).map(s => s.properties.title);
+}
+
+async function ensureTabsExist(tabNames) {
+  const existing = await getExistingSheetTitles();
+  const missing = tabNames.filter(t => !existing.includes(t));
+  if (!missing.length) return;
+  const requests = missing.map(title => ({ addSheet: { properties: { title } } }));
+  const r = await fetch(`${GSHEETS}/${sheetId}:batchUpdate`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ requests })
+  });
+  if (!r.ok) throw new Error(`Tab creation failed: ${await r.text()}`);
+}
+
+async function sheetsAppend(tab, rows) {
+  const r = await fetch(`${GSHEETS}/${sheetId}/values/${encodeURIComponent(tab)}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values: rows })
+  });
+  if (!r.ok) throw new Error(`Append failed on tab "${tab}": ${await r.text()}`);
+}
+
+async function sheetsWriteHeader(tab, headerRow) {
+  // Only write header if row 1 is empty
+  const r = await fetch(`${GSHEETS}/${sheetId}/values/${encodeURIComponent(tab)}!A1`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  const j = await r.json();
+  if (!j.values) {
+    await fetch(`${GSHEETS}/${sheetId}/values/${encodeURIComponent(tab)}!A1?valueInputOption=USER_ENTERED`, {
+      method: 'PUT',
+      headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ values: [headerRow] })
+    });
+  }
+}
+
 async function exportToSheets() {
   closeSheetsModal();
   if (!sheetId) { alert('No Google Sheet ID configured. Add it in the setup screen.'); return; }
   const today = new Date().toISOString().split('T')[0];
 
-  for (const p of PROPS) {
-    const d = data[p.id]; if (!d || d.err) continue;
-    const topQ = d.queries.sort((a,b)=>b.clicks-a.clicks)[0]?.keys[0]||'';
-    const topP = d.pages.sort((a,b)=>b.clicks-a.clicks)[0]?.keys[0]||'';
-    const mob  = d.devices.find(r=>r.keys[0]==='MOBILE')||{ctr:0};
-    const desk = d.devices.find(r=>r.keys[0]==='DESKTOP')||{ctr:0};
-    // Weekly tab
-    await sheetsAppend(`Weekly_${p.short}`, [[today, fmtN(d.totals.clicks), fmtN(d.totals.impressions), (d.totals.ctr*100).toFixed(2)+'%', d.totals.position.toFixed(1), topQ, topP, (mob.ctr*100).toFixed(2)+'%', (desk.ctr*100).toFixed(2)+'%', '']]);
-    // Monthly summary
-    await sheetsAppend('Monthly_Summary', [[today, p.label, d.totals.clicks, d.totals.impressions, (d.totals.ctr*100).toFixed(2), d.totals.position.toFixed(1), '', '', '', '', '', '']]);
-  }
-  // Alerts log
-  if (alerts.length) {
-    const alertRows = alerts.map(a=>[today, a.prop, a.metric, a.val, '', '', 'Open']);
-    await sheetsAppend('Alerts_Log', alertRows);
-  }
-  // Opportunity tracker
-  PROPS.forEach(async p => {
-    const d = data[p.id]; if (!d||d.err) return;
-    const opps = d.queries.filter(r=>r.position>=4&&r.position<=10).slice(0,10).map(r=>[r.keys[0], r.position.toFixed(1), r.impressions, (r.ctr*100).toFixed(2)+'%', '', '', '']);
-    if (opps.length) await sheetsAppend('Opportunity_Tracker', opps);
-  });
-  alert('✅ Exported to Google Sheets successfully!');
-}
+  // Collect all tab names needed
+  const allTabs = [];
+  PROPS.forEach(p => allTabs.push(`Weekly_${p.short}`));
+  allTabs.push('Monthly_Summary','Alerts_Log','Opportunity_Tracker','CWV_Log','Branded_Keywords','NonBranded_Keywords');
 
-async function sheetsAppend(tab, rows) {
-  await fetch(`${GSHEETS}/${sheetId}/values/${encodeURIComponent(tab)}:append?valueInputOption=USER_ENTERED`,{
-    method:'POST',
-    headers:{'Authorization':`Bearer ${token}`,'Content-Type':'application/json'},
-    body:JSON.stringify({values:rows})
-  });
+  try {
+    // Step 1: ensure all tabs exist (create if missing)
+    await ensureTabsExist(allTabs);
+
+    // Step 2: write headers if tabs are fresh
+    for (const p of PROPS) {
+      await sheetsWriteHeader(`Weekly_${p.short}`, ['Date','Clicks','Impressions','CTR','Avg Position','Top Query','Top Page','Mobile CTR','Desktop CTR','Notes']);
+    }
+    await sheetsWriteHeader('Monthly_Summary', ['Date','Property','Clicks 28D','Impr 28D','CTR','Avg Pos','MoM Clicks Δ','MoM Pos Δ','LCP Mobile','LCP Desktop','CLS','INP']);
+    await sheetsWriteHeader('Alerts_Log', ['Date','Property','Alert Type','Value','Threshold','Severity','Status']);
+    await sheetsWriteHeader('Opportunity_Tracker', ['Query','Current Position','Impressions','CTR','Target Position','Page URL','Cluster','Priority']);
+    await sheetsWriteHeader('CWV_Log', ['Date','Property','URL','LCP Mobile','CLS','INP','TTFB','Score','Status']);
+    await sheetsWriteHeader('Branded_Keywords', ['Date','Property','Query','Clicks','Impressions','CTR','Position']);
+    await sheetsWriteHeader('NonBranded_Keywords', ['Date','Property','Query','Clicks','Impressions','CTR','Position']);
+
+    // Step 3: write data
+    for (const p of PROPS) {
+      const d = data[p.id]; if (!d || d.err) continue;
+      const topQ  = d.queries.sort((a,b)=>b.clicks-a.clicks)[0]?.keys[0] || '';
+      const topP  = d.pages.sort((a,b)=>b.clicks-a.clicks)[0]?.keys[0] || '';
+      const mob   = d.devices.find(r=>r.keys[0]==='MOBILE')  || {ctr:0};
+      const desk  = d.devices.find(r=>r.keys[0]==='DESKTOP') || {ctr:0};
+
+      // Weekly
+      await sheetsAppend(`Weekly_${p.short}`, [[
+        today, d.totals.clicks, d.totals.impressions,
+        (d.totals.ctr*100).toFixed(2)+'%', d.totals.position.toFixed(1),
+        topQ, topP,
+        (mob.ctr*100).toFixed(2)+'%', (desk.ctr*100).toFixed(2)+'%', ''
+      ]]);
+
+      // Monthly summary
+      await sheetsAppend('Monthly_Summary', [[
+        today, p.label, d.totals.clicks, d.totals.impressions,
+        (d.totals.ctr*100).toFixed(2), d.totals.position.toFixed(1),
+        '', '', '', '', '', ''
+      ]]);
+
+      // Branded / Non-branded split
+      const branded    = d.queries.filter(r => isBranded(r.keys[0], p));
+      const nonBranded = d.queries.filter(r => !isBranded(r.keys[0], p));
+
+      if (branded.length) {
+        await sheetsAppend('Branded_Keywords', branded.map(r => [
+          today, p.label, r.keys[0], r.clicks, r.impressions,
+          (r.ctr*100).toFixed(2)+'%', r.position.toFixed(1)
+        ]));
+      }
+      if (nonBranded.length) {
+        await sheetsAppend('NonBranded_Keywords', nonBranded.map(r => [
+          today, p.label, r.keys[0], r.clicks, r.impressions,
+          (r.ctr*100).toFixed(2)+'%', r.position.toFixed(1)
+        ]));
+      }
+
+      // Opportunity tracker
+      const opps = d.queries.filter(r=>r.position>=4&&r.position<=10).sort((a,b)=>b.impressions-a.impressions).slice(0,15);
+      if (opps.length) {
+        await sheetsAppend('Opportunity_Tracker', opps.map(r => [
+          r.keys[0], r.position.toFixed(1), r.impressions,
+          (r.ctr*100).toFixed(2)+'%', '', '', '',
+          r.impressions>500&&r.ctr<0.05?'HIGH':r.impressions>200?'MID':'LOW'
+        ]));
+      }
+    }
+
+    // Alerts log
+    if (alerts.length) {
+      await sheetsAppend('Alerts_Log', alerts.map(a => [
+        today, a.prop, a.metric, a.val, '', a.type.toUpperCase(), 'Open'
+      ]));
+    }
+
+    alert('✅ Exported successfully!\n\nTabs updated:\n' + allTabs.join('\n'));
+  } catch(e) {
+    alert(`❌ Export failed: ${e.message}\n\nCheck that your Sheet ID is correct and the sheet is shared with your Google account.`);
+  }
 }
 
 // ═══════════════════════════════════
@@ -1216,7 +1326,7 @@ async function callOR(userPrompt) {
       'X-Title': 'Impacteers GSC Dashboard',
     },
     body: JSON.stringify({
-      model: 'anthropic/claude-sonnet-4-5',
+      model: 'anthropic/claude-sonnet-4-5-20250514',
       max_tokens: 1200,
       messages: [
         { role: 'system', content: AI_SYSTEM },
@@ -1226,6 +1336,29 @@ async function callOR(userPrompt) {
   });
   if (!res.ok) {
     const err = await res.text();
+    // Fallback: try claude-3.5-sonnet if 4.5 not available on account
+    if (res.status === 404 || res.status === 400) {
+      const res2 = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${orKey}`,
+          'Content-Type': 'application/json',
+          'HTTP-Referer': location.origin,
+          'X-Title': 'Impacteers GSC Dashboard',
+        },
+        body: JSON.stringify({
+          model: 'anthropic/claude-3.5-sonnet',
+          max_tokens: 1200,
+          messages: [
+            { role: 'system', content: AI_SYSTEM },
+            { role: 'user', content: userPrompt }
+          ]
+        })
+      });
+      if (!res2.ok) throw new Error(`OpenRouter error ${res2.status}: ${await res2.text()}`);
+      const json2 = await res2.json();
+      return json2.choices?.[0]?.message?.content || 'No response received.';
+    }
     throw new Error(`OpenRouter error ${res.status}: ${err}`);
   }
   const json = await res.json();
@@ -1237,6 +1370,105 @@ function formatAIOutput(text) {
     .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
     .replace(/^#{1,3} (.+)$/gm, '<h3>$1</h3>')
     .replace(/\n/g, '<br>');
+}
+
+// ═══════════════════════════════════
+// BRANDED / NON-BRANDED SPLIT
+// ═══════════════════════════════════
+const BRAND_TERMS = {
+  impacteers:  ['impacteers'],
+  xooper:      ['xooper'],
+  recruitment: ['impacteers','recruitment.impacteers'],
+  futurejobs:  ['futurejobs','future jobs'],
+  examprep:    ['examprep','exam prep','impacteers exam'],
+};
+
+function isBranded(query, prop) {
+  const q = query.toLowerCase();
+  const terms = BRAND_TERMS[prop.id] || [];
+  return terms.some(t => q.includes(t));
+}
+
+function renderBranded(d) {
+  const area = document.getElementById('content-area');
+  if (!d) { area.innerHTML = emptyHTML(); injectFetchBtn(area); return; }
+  const branded    = d.queries.filter(r => isBranded(r.keys[0], d.prop));
+  const nonBranded = d.queries.filter(r => !isBranded(r.keys[0], d.prop));
+  const bClicks  = branded.reduce((s,r)=>s+r.clicks,0);
+  const nbClicks = nonBranded.reduce((s,r)=>s+r.clicks,0);
+  const total    = bClicks + nbClicks || 1;
+  const bImpr    = branded.reduce((s,r)=>s+r.impressions,0);
+  const nbImpr   = nonBranded.reduce((s,r)=>s+r.impressions,0);
+
+  area.innerHTML = `
+    ${cBar('Branded vs Non-Branded','Keyword intent segmentation',true)}
+    <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+      ${miniKpi('Branded Clicks','#4f46e5',fmtN(bClicks),`${Math.round(bClicks/total*100)}% of total`)}
+      ${miniKpi('Non-Branded Clicks','#10b981',fmtN(nbClicks),`${Math.round(nbClicks/total*100)}% of total`)}
+      ${miniKpi('Branded Impr','#8b5cf6',fmtN(bImpr),`${branded.length} queries`)}
+      ${miniKpi('Non-Branded Impr','#f59e0b',fmtN(nbImpr),`${nonBranded.length} queries`)}
+    </div>
+    <div class="chart-grid-2" style="margin-bottom:16px">
+      <div class="ccard">
+        <div class="cheader"><div><div class="ctitle">Click Share</div><div class="csub">Branded vs Non-Branded</div></div></div>
+        <div class="ch" style="height:180px"><canvas id="c-brand-donut"></canvas></div>
+      </div>
+      <div class="ccard">
+        <div class="cheader"><div><div class="ctitle">Avg Position &amp; CTR Comparison</div></div></div>
+        <div class="ch" style="height:180px"><canvas id="c-brand-pos"></canvas></div>
+      </div>
+    </div>
+    <div class="tgrid">
+      <div class="tcard">
+        <div class="thead-row">
+          <div><div class="tc-title">Branded Keywords</div><div class="tc-sub">${branded.length} queries · brand recognition traffic</div></div>
+          <span class="tag" style="background:var(--al);color:var(--accent);font-size:10px;font-weight:600">BRANDED</span>
+        </div>
+        <table><thead><tr><th>#</th><th>Query</th><th>Clicks</th><th>Impr</th><th>CTR</th><th>Pos</th></tr></thead>
+        <tbody>${branded.sort((a,b)=>b.clicks-a.clicks).slice(0,20).map((r,i)=>`<tr>
+          <td style="color:var(--tm);font-size:10px">${i+1}</td>
+          <td class="td-p">${r.keys[0]}</td>
+          <td><strong>${fmtN(r.clicks)}</strong></td>
+          <td>${fmtN(r.impressions)}</td>
+          <td>${(r.ctr*100).toFixed(2)}%</td>
+          <td>${posBadge(r.position)}</td></tr>`).join('')}
+        ${!branded.length?'<tr><td colspan="6" style="text-align:center;color:var(--tm);padding:16px">No branded queries detected this period</td></tr>':''}</tbody></table>
+      </div>
+      <div class="tcard">
+        <div class="thead-row">
+          <div><div class="tc-title">Non-Branded Keywords</div><div class="tc-sub">${nonBranded.length} queries · organic discovery traffic</div></div>
+          <span class="tag" style="background:var(--gl);color:var(--green);font-size:10px;font-weight:600">NON-BRANDED</span>
+        </div>
+        <table><thead><tr><th>#</th><th>Query</th><th>Clicks</th><th>Impr</th><th>CTR</th><th>Pos</th></tr></thead>
+        <tbody>${nonBranded.sort((a,b)=>b.clicks-a.clicks).slice(0,20).map((r,i)=>`<tr>
+          <td style="color:var(--tm);font-size:10px">${i+1}</td>
+          <td class="td-p">${r.keys[0]}</td>
+          <td><strong>${fmtN(r.clicks)}</strong></td>
+          <td>${fmtN(r.impressions)}</td>
+          <td>${(r.ctr*100).toFixed(2)}%</td>
+          <td>${posBadge(r.position)}</td></tr>`).join('')}
+        ${!nonBranded.length?'<tr><td colspan="6" style="text-align:center;color:var(--tm);padding:16px">No non-branded queries</td></tr>':''}</tbody></table>
+      </div>
+    </div>`;
+
+  const ctx1 = document.getElementById('c-brand-donut').getContext('2d');
+  charts['bdonut'] = new Chart(ctx1,{type:'doughnut',data:{
+    labels:['Branded','Non-Branded'],
+    datasets:[{data:[bClicks,nbClicks],backgroundColor:['#4f46e5','#10b981'],borderWidth:2,borderColor:'#fff',hoverOffset:4}]
+  },options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{position:'bottom',labels:{font:{family:'Poppins',size:10},padding:8,boxWidth:10}},tooltip:{callbacks:{label:c=>` ${fmtN(c.parsed)} clicks`}}}}});
+
+  const bAvgPos  = branded.length    ? branded.reduce((s,r)=>s+r.position,0)/branded.length    : 0;
+  const nbAvgPos = nonBranded.length ? nonBranded.reduce((s,r)=>s+r.position,0)/nonBranded.length : 0;
+  const bAvgCtr  = branded.length    ? branded.reduce((s,r)=>s+r.ctr,0)/branded.length*100    : 0;
+  const nbAvgCtr = nonBranded.length ? nonBranded.reduce((s,r)=>s+r.ctr,0)/nonBranded.length*100 : 0;
+  const ctx2 = document.getElementById('c-brand-pos').getContext('2d');
+  charts['bpos'] = new Chart(ctx2,{type:'bar',data:{
+    labels:['Avg Position','Avg CTR %'],
+    datasets:[
+      {label:'Branded',    data:[+bAvgPos.toFixed(1),  +bAvgCtr.toFixed(2)],  backgroundColor:'rgba(79,70,229,.8)',  borderRadius:4},
+      {label:'Non-Branded',data:[+nbAvgPos.toFixed(1), +nbAvgCtr.toFixed(2)], backgroundColor:'rgba(16,185,129,.8)', borderRadius:4},
+    ]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{labels:{font:{family:'Poppins',size:10}}}},scales:{x:{grid:{display:false},ticks:{font:{family:'Poppins',size:10}}},y:{grid:{color:'#f0f2f9'},ticks:{font:{family:'Poppins',size:10}}}}}});
 }
 
 // ═══════════════════════════════════
